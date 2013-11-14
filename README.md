@@ -7,5 +7,11 @@ It is in need of some TLC (not TLS, wink).  TODO: Refactor, write testing framew
 
 Dependencies: 
 1. intel fortran compiler: uses MKL libraries for hefty matrix diagonalization
+
 2. ARPACK: http://www.caam.rice.edu/software/ARPACK/
+
 3. CrysFML
+
+It will work, but you have to know what you're doing!
+
+I will push programs that use the library as I clean them up.  Contact me if you are interested!  A contact got me this far!
