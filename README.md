@@ -3,7 +3,8 @@ CrysENM
 
 Fortran 90 toolkit for application of elastic network models to proteins in the crystalline state. 
 I wrote this as a NLM postdoctoral trainee in the laboratory of George N. Phillips, Jr from 2007-2010.  
-It is in need of some TLC (not TLS, wink).  TODO: Refactor, reduce, write testing framework, remove compiler dependencies.  
+It is in need of some TLC (not TLS, wink).  TODO: Refactor, reduce, write testing framework, remove compiler dependencies, 
+expand.  
 
 Dependencies: 
 
