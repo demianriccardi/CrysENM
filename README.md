@@ -19,7 +19,7 @@ It will work, but you have to know what you're doing!
 I will push programs that use the library as I clean them up.  Contact me if you are interested!  
 A contact got me this far!
 
-if used, please cite:
+if used productively, please cite:
 
 Riccardi D., Cui Q., Phillips Jr. G. N., 
 “Application of elastic network models to proteins in the crystalline state”, Biophys. J., 96, 464 (2009)
