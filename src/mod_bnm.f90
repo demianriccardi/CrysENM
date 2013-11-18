@@ -361,9 +361,9 @@ subroutine vect_proj(blocks,bvects,atvects)
 ! currently, each block has a pmat that is 6x3Nb 
 ! and a pointer array that gives xyz of the 3Nb
 ! we may want to make this easier to understand later 
-use mod_types, only : sparse
-use mod_inout, only : sparse_to_full,full_to_sparse
-use mkl95_blas, only : gemm
+use mod_types,  only : sparse
+use mod_inout,  only : sparse_to_full,full_to_sparse
+use mod_linalg, only : my_dgemm
 type(block),allocatable, intent(in)  :: blocks(:)
 real(dp),allocatable,    intent(in)  :: bvects(:,:)
 real(dp),allocatable,    intent(out)  :: atvects(:,:)
@@ -387,7 +387,7 @@ call gen_bigproj(blocks,bigproj)
 !print *, 'vect_proj dim bigproj', size(bigproj,1),size(bigproj,2)
 !print *, 'vect_proj dim bvects' , size(bvects,1),size(bvects,2)
 !print *, 'vect_proj dim atvects' , size(atvects,1),size(atvects,2)
-call gemm(bigproj,bvects,atvects,'n','n',1.0d0,0.0d0)
+call my_dgemm(bigproj,bvects,atvects,'n','n',1.0d0,0.0d0)
 
 end subroutine
 
@@ -476,8 +476,7 @@ subroutine hess_proj(shess,blocks,bnmhess)
 !   we'll try 1. first.
 !
 use mod_types,  only : sparse
-!use mod_linalg, only : blas_dgemm
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 use mod_inout,  only : sparse_to_full,full_to_sparse
 type(sparse)            ,   intent(in)  :: shess
 type(block),allocatable,    intent(in)  :: blocks(:)
@@ -517,7 +516,7 @@ end subroutine
 
 subroutine pti_hij_pj(blocki,hess,blockj,mat)
 ! DMR added December 7,2009 to speed up projection
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 type(block),          intent(in)  :: blocki,blockj
 real(dp),allocatable, intent(in)  :: hess(:,:)
 real(dp) :: mat(6,6)
@@ -538,16 +537,16 @@ end do
 allocate(rphess(indim,6),stat=ier)
 if(ier /= 0) stop "pti_hij_pj> memory error"
 
-call gemm(subhess,blockj%pmat,rphess,'n','t',1.0d0,0.0d0)
+call my_dgemm(subhess,blockj%pmat,rphess,'n','t',1.0d0,0.0d0)
 deallocate(subhess)
-call gemm(blocki%pmat,rphess,mat,'n','n',1.0d0,0.0d0)
+call my_dgemm(blocki%pmat,rphess,mat,'n','n',1.0d0,0.0d0)
 deallocate(rphess)
 
 end subroutine
 
 subroutine pti_dij_pj(blocki,dynm,blockj,mat)
 ! DMR added December 7,2009 to speed up projection
-use mkl95_blas, only : zgemm_mkl95
+use mod_linalg, only : my_zgemm
 type(block),             intent(in)  :: blocki,blockj
 complex(dp),allocatable, intent(in)  :: dynm(:,:)
 complex(dp) :: mat(6,6)
@@ -579,9 +578,9 @@ end do
 allocate(rpdynm(indim,6),stat=ier)
 if(ier /= 0) stop "pti_hij_pj> memory error"
 
-call ZGEMM_MKL95(subdynm,zpmatj,rpdynm,'n','n',zone,zzero)
+call my_ZGEMM(subdynm,zpmatj,rpdynm,'n','n',zone,zzero)
 deallocate(subdynm)
-call ZGEMM_MKL95(zpmati,rpdynm,mat,'t','n',zone,zzero)
+call my_ZGEMM(zpmati,rpdynm,mat,'t','n',zone,zzero)
 deallocate(rpdynm)
 
 end subroutine
@@ -589,8 +588,7 @@ end subroutine
 
 subroutine hess_proj_old(shess,blocks,bnmhess)
 use mod_types,  only : sparse
-!use mod_linalg, only : blas_dgemm
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 use mod_inout,  only : sparse_to_full,full_to_sparse
 type(sparse)            ,   intent(in)  :: shess
 type(block),allocatable,    intent(in)  :: blocks(:)
@@ -614,9 +612,9 @@ call cpu_time(time1)
 call gen_bigproj(blocks,bigproj)
 call cpu_time(time2)
 print *, "hess_proj> time generating bigproj,",time2-time1
-call gemm(fhess,bigproj,phess1,'n','n',1.0d0,0.0d0)
+call my_dgemm(fhess,bigproj,phess1,'n','n',1.0d0,0.0d0)
 deallocate(fhess)
-call gemm(bigproj,phess1,phess2,'t','n',1.0d0,0.0d0)
+call my_dgemm(bigproj,phess1,phess2,'t','n',1.0d0,0.0d0)
 deallocate(phess1)
 print *, "hess_proj> convert bnmhess to sparse"
 call full_to_sparse(phess2,bnmhess)
@@ -650,8 +648,7 @@ subroutine dynmat_proj(dynmat,blocks,bnmdyn)
 !     2. write subroutine to carry out multiplication directly
 !
 use mod_types,  only : sparse
-!use mod_linalg, only : blas_dgemm
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 use mod_inout,  only : zsparse_to_full,zfull_to_zsparse,&
                        sparse_upper_to_gen,sparse_deinit
 type(sparse)            ,   intent(in)  :: dynmat
@@ -695,7 +692,7 @@ end subroutine
 
 subroutine dynmat_proj_old(dynmat,blocks,bnmdyn)
 use mod_types,  only : sparse
-use mkl95_blas, only : ZGEMM_MKL95
+use mod_linalg, only : my_zgemm
 use mod_inout,  only : zsparse_to_full,zfull_to_zsparse,sparse_upper_to_gen,sparse_deinit
 type(sparse)            ,   intent(in out)  :: dynmat
 type(block),allocatable,    intent(in)  :: blocks(:)
@@ -729,9 +726,10 @@ fbnmdyn = cmplx(zero,zero)
 tmp     = cmplx(zero,zero)
 
 call dp_zp(bigproj,zbigproj)
-call ZGEMM_MKL95(fdyn,zbigproj,tmp,'n','n',zone,zzero)
+call my_ZGEMM(fdyn,zbigproj,tmp,'n','n',zone,zzero)
 deallocate (fdyn)
-call ZGEMM_MKL95(zbigproj,tmp,fbnmdyn,'t','n',zone,zzero)
+call my_ZGEMM(zbigproj,tmp,fbnmdyn,'t','n',zone,zzero)
+!call ZGEMM_MKL95(zbigproj,tmp,fbnmdyn,'t','n',zone,zzero)
 deallocate(zbigproj)
 deallocate(tmp)
 call zfull_to_zsparse(fbnmdyn,tmpdyn)
@@ -761,7 +759,7 @@ end subroutine
 
 subroutine vcov_proj(bvcov,blocks,vcov)
 use mod_inout
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 real(dp),allocatable,   intent(in)      :: bvcov(:,:)
 type(block),allocatable,    intent(in)  :: blocks(:)
 real(dp),allocatable,   intent(out)     :: vcov(:,:)
@@ -812,8 +810,7 @@ end do
 end subroutine
 
 subroutine pi_vcov_ptj(blocki,bvcov,blockj,vcov)
-! DMR added December 7,2009 to speed up projection
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 type(block),          intent(in)   :: blocki,blockj
 real(dp)            , intent(in)   :: bvcov(6,6)
 real(dp),allocatable, intent(out)  ::  vcov(:,:)
@@ -832,15 +829,15 @@ pmatj = transpose(blockj%pmat)
 allocate(rpvcov(6,jndim),stat=ier)
 if(ier /= 0) stop "pti_hij_pj> memory error"
 
-call gemm(bvcov,pmatj,rpvcov,'n','t',1.0d0,0.0d0)
-call gemm(pmati,rpvcov,vcov ,'n','n',1.0d0,0.0d0)
+call my_dgemm(bvcov,pmatj,rpvcov,'n','t',1.0d0,0.0d0)
+call my_dgemm(pmati,rpvcov,vcov ,'n','n',1.0d0,0.0d0)
 deallocate(rpvcov)
 
 end subroutine
 
 subroutine vcov_proj_old(svcov,blocks,bvcov)
 use mod_inout
-use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 real(dp),allocatable,   intent(in)      :: svcov(:,:)
 type(block),allocatable,    intent(in)  :: blocks(:)
 real(dp),allocatable,   intent(out)     :: bvcov(:,:)
@@ -860,8 +857,8 @@ allocate(tmp(6*size(blocks),cdim),stat=ier)
 if(ier /= 0) stop "vcov_proj> memory error"
 
 call gen_bigproj(blocks,bigproj)
-call gemm(svcov,bigproj,tmp,'n','t',1.0d0,0.0d0)
-call gemm(bigproj,tmp,bvcov,'n','n',1.0d0,0.0d0)
+call my_dgemm(svcov,bigproj,tmp,'n','t',1.0d0,0.0d0)
+call my_dgemm(bigproj,tmp,bvcov,'n','n',1.0d0,0.0d0)
 !bvcov = matmul(bigproj,matmul(svcov,transpose(bigproj)))
 !call gemm(bigproj,bvects,atvects,'n','n',1.0d0,0.0d0)
 

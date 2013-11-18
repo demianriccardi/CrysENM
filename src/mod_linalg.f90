@@ -54,9 +54,97 @@ deallocate(a,w,rwork,iwork,work)
 
 end subroutine
 
+subroutine my_dgemm (a, b, c, TransA,TransB,alpha,beta)
+real(kind=8),intent(in),  allocatable  :: A(:,:), B(:,:)
+real(kind=8),intent(inout), allocatable  :: C(:,:)
+character*1 ,intent(in)                :: TransA, TransB
+real(kind=8),intent(in)                :: alpha,beta
+!
+integer                                :: M, N, K, LDA, LDB, LDC
+integer                                :: ierr
+
+if (TransA .eq. 'N') then
+  M=size(a(:,1))
+  K=size(a(1,:))
+  LDA = M
+else
+  M=size(a(1,:))
+  K=size(a(:,1))
+  LDA = K
+endif
+
+if (TransB .eq. 'N') then
+  N=size(b(1,:))
+  if (K .ne. size(b(:,1))) stop "my_dgemm> dimension mismatch"
+  LDB = K
+else
+  N=size(b(:,1))
+  if (K .ne. size(b(1,:))) stop "my_dgemm> dimension mismatch"
+  LDB = N
+endif
+
+LDC = M
+
+if(allocated(C)) then
+  if ( (size(C(:,1)) .ne. M) .or. (size(C(1,:)) .ne. N) ) then 
+    stop "my_dgemm> dimension mismatch"
+  endif
+else
+  allocate(C(M,N),stat=ierr)
+  C = 0.0d0
+endif
+
+call dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
+
+end subroutine
+
+subroutine my_zgemm (a, b, c, TransA,TransB,alpha,beta)
+complex(kind=8),intent(in),    allocatable  :: A(:,:), B(:,:)
+complex(kind=8),intent(inout), allocatable  :: C(:,:)
+character*1 ,intent(in)                :: TransA, TransB
+complex(kind=8),intent(in)                :: alpha,beta
+!
+integer                                :: M, N, K, LDA, LDB, LDC
+integer                                :: ierr
+
+if (TransA .eq. 'N') then
+  M=size(a(:,1))
+  K=size(a(1,:))
+  LDA = M
+else
+  M=size(a(1,:))
+  K=size(a(:,1))
+  LDA = K
+endif
+
+if (TransB .eq. 'N') then
+  N=size(b(1,:))
+  if (K .ne. size(b(:,1))) stop "my_dgemm> dimension mismatch"
+  LDB = K
+else
+  N=size(b(:,1))
+  if (K .ne. size(b(1,:))) stop "my_dgemm> dimension mismatch"
+  LDB = N
+endif
+
+LDC = M
+
+if(allocated(C)) then
+  if ( (size(C(:,1)) .ne. M) .or. (size(C(1,:)) .ne. N) ) then 
+    stop "my_dgemm> dimension mismatch"
+  endif
+else
+  allocate(C(M,N),stat=ierr)
+  C = cmplx(0.0d0,0.0d0,kind = wp)
+endif
+
+call zgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
+
+end subroutine
+
 subroutine zheevr_zeig (nfirst,nlast,matin, &
                              vals)
-use mkl95_lapack, only : cheevr_mkl95,zheevr_mkl95
+use f95_lapack, only : la_heevr
 ! slower pseudo inverse where identity matrix is converted to pseudo inverse
 integer        ,intent(in)               :: nfirst,nlast
 complex(kind=8),intent(in), allocatable  :: matin(:,:)
@@ -80,7 +168,7 @@ if (ierr /= 0) STOP "*** not enough memory ***"
 
 A=matin
 
-call zheevr_mkl95(a,w,il=il,iu=iu)
+call la_heevr(a,w,il=il,iu=iu)
 
 vals=w(1:nv)
 call cpu_time(time2)
