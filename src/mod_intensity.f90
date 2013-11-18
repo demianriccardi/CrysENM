@@ -229,8 +229,8 @@ do ll=lstart,lstop
 
         end do
       end do
-          write (22,'(3I4,3F10.4,4F16.3)') hh,kk,ll,qc,int_exp(h,k,l), &
-            int_thr(h,k,l),int_thrx(h,k,l), int_thrx(h,k,l)-int_thr(h,k,l)
+          write (22,'(3I4,3F10.4,4F16.3)') hh,kk,ll,qc,int_exp(hh,kk,ll), &
+            int_thr(hh,kk,ll),int_thrx(hh,kk,ll), int_thrx(hh,kk,ll)-int_thr(hh,kk,ll)
     end do
   end do
 end do
@@ -406,8 +406,8 @@ do ll=lstart,lstop
         end do
         icor=icor+incr
       end do
-      write (22,'(3I4,3F10.4,5F16.3)') hh,kk,ll,qc,int_exp(h,k,l),int_thrbf(h,k,l), &
-            int_thr(h,k,l),int_thrx(h,k,l), int_thrx(h,k,l)-int_thr(h,k,l)
+      write (22,'(3I4,3F10.4,5F16.3)') hh,kk,ll,qc,int_exp(hh,kk,ll),int_thrbf(hh,kk,ll), &
+            int_thr(hh,kk,ll),int_thrx(hh,kk,ll), int_thrx(hh,kk,ll)-int_thr(hh,kk,ll)
 
     end do
   end do
@@ -567,8 +567,8 @@ do ll=lstart,lstop
         end do
         icor=icor+incr
       end do
-      write (22,'(3I4,3F10.4,4F16.3)') hh,kk,ll,qc,int_exp(h,k,l), &
-            int_thr(h,k,l),int_thrx(h,k,l), int_thrx(h,k,l)-int_thr(h,k,l)
+      write (22,'(3I4,3F10.4,4F16.3)') hh,kk,ll,qc,int_exp(hh,kk,ll), &
+            int_thr(hh,kk,ll),int_thrx(hh,kk,ll),int_thrx(hh,kk,ll)-int_thr(hh,kk,ll)
 
     end do
   end do

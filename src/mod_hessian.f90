@@ -750,7 +750,8 @@ end subroutine
  
 subroutine dvcov(input,vals,vecs,vcov,nzeros)
 use mod_constants, only: Rkcal
-use mkl95_blas, only : gemm
+!use mkl95_blas, only : gemm
+use mod_linalg, only : my_dgemm
 ! take in the eigenvalues: units rad^2 kcal mol^-1 amu^-1 angs^2
 ! 
 type(inp_par) , intent(in) :: input
@@ -800,7 +801,7 @@ end do
 
 print *, 'computing the variance-covariance matrix'
 print *, 'from first mode: ', nfirst, 'to last mode: ', nlast  
-call gemm(mat2,mat2,vcov,'n','t',1.0d0,0.0d0)
+call my_dgemm(mat2,mat2,vcov,'n','t',1.0d0,0.0d0)
 print *, 'done computing variance-covariance matrix'
 
 !if(trim(input%weigh) .eq. 'mass' .or. trim(input%weigh) .eq. 'byatom')  then
