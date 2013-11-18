@@ -26,6 +26,8 @@ Riccardi D., Cui Q., Phillips Jr. G. N.,
 Riccardi D., Cui Q., Phillips Jr. G. N., 
 “Evaluating elastic network models of crystalline biological molecules with temperature factors, correlated motions, and diffuse X-ray scattering”, Biophys. J., 99, 2616 (2010)
 
+Disclaimer
+
 The CrysENM library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY of being free of 
 internal errors. In no event will the authors be liable to you for damages, including any general, special, 
 incidental or consequential damages arising out of the use or inability to use the library (including but
