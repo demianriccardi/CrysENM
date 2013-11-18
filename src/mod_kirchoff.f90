@@ -511,7 +511,7 @@ if (dist .le. input%rcut_start) then
         distances(ii,jj)   = dist 
       end if
     
-      if (input%multint .eq. .false.) then    
+      if (input%multint .eqv. .false.) then    
       !if (input%multint) then
             !do nothing...  no unless in fortran??
       !else

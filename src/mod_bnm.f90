@@ -482,7 +482,7 @@ type(sparse)            ,   intent(in)  :: shess
 type(block),allocatable,    intent(in)  :: blocks(:)
 type(sparse),               intent(out) :: bnmhess
 real(dp),allocatable :: fhess(:,:),phess(:,:),rphess(:,:)
-real(dp) :: tmat(6,6)
+real(dp),allocatable :: tmat(:,:)
 integer :: i,j,ier,nblocks
 integer :: iblock,jblock
 integer :: ndb
@@ -519,7 +519,7 @@ subroutine pti_hij_pj(blocki,hess,blockj,mat)
 use mod_linalg, only : my_dgemm
 type(block),          intent(in)  :: blocki,blockj
 real(dp),allocatable, intent(in)  :: hess(:,:)
-real(dp) :: mat(6,6)
+real(dp),allocatable :: mat(:,:)
 real(dp),allocatable              :: subhess(:,:),rphess(:,:)
 integer :: i,j,indim,jndim,ier
 
@@ -549,7 +549,7 @@ subroutine pti_dij_pj(blocki,dynm,blockj,mat)
 use mod_linalg, only : my_zgemm
 type(block),             intent(in)  :: blocki,blockj
 complex(dp),allocatable, intent(in)  :: dynm(:,:)
-complex(dp) :: mat(6,6)
+complex(dp),allocatable :: mat(:,:)
 complex(dp),allocatable :: subdynm(:,:),rpdynm(:,:),zpmati(:,:),zpmatj(:,:)
 integer :: i,j,indim,jndim,ier
 complex(dp) :: zone,zzero
@@ -656,7 +656,7 @@ type(block),allocatable,    intent(in)  :: blocks(:)
 type(sparse),    intent(out)  :: bnmdyn
 type(sparse)                  :: tmpdyn
 complex(dp),allocatable :: fdyn(:,:),pdynm(:,:)
-complex(dp) :: tmat(6,6)
+complex(dp),allocatable :: tmat(:,:)
 integer :: i,j,ier,nblocks
 integer :: iblock,jblock
 integer :: ndb
@@ -764,7 +764,7 @@ real(dp),allocatable,   intent(in)      :: bvcov(:,:)
 type(block),allocatable,    intent(in)  :: blocks(:)
 real(dp),allocatable,   intent(out)     :: vcov(:,:)
 real(dp),allocatable                    :: sub_vcov(:,:)
-real(dp) :: sub_bvcov(6,6)
+real(dp),allocatable :: sub_bvcov(:,:)
 integer :: natoms, nblocks, iblock,jblock 
 integer :: i,j,k,l,ier,cdim 
 
@@ -775,7 +775,7 @@ do i = 1, nblocks
 end do
 cdim = 3*natoms
 
-allocate(vcov(cdim,cdim),stat=ier)
+allocate(vcov(cdim,cdim),sub_bvcov(6,6),stat=ier)
 if(ier /= 0) stop "vcov_proj> memory error"
 
 iblock = 1
@@ -812,7 +812,7 @@ end subroutine
 subroutine pi_vcov_ptj(blocki,bvcov,blockj,vcov)
 use mod_linalg, only : my_dgemm
 type(block),          intent(in)   :: blocki,blockj
-real(dp)            , intent(in)   :: bvcov(6,6)
+real(dp),allocatable, intent(in)   :: bvcov(:,:)
 real(dp),allocatable, intent(out)  ::  vcov(:,:)
 real(dp),allocatable               :: rpvcov(:,:)
 real(dp), allocatable              :: pmati(:,:),pmatj(:,:)
@@ -842,7 +842,7 @@ real(dp),allocatable,   intent(in)      :: svcov(:,:)
 type(block),allocatable,    intent(in)  :: blocks(:)
 real(dp),allocatable,   intent(out)     :: bvcov(:,:)
 real(dp),allocatable :: tmp(:,:),bigproj(:,:)
-integer :: row,col,i,j,ndim,k,l,ll,ier,nblocks,pi,iblock,fblock
+integer :: row,col,i,j,ndim,k,l,ll,ier,nblocks,iblock,fblock
 integer :: natoms,cdim,bdim
 
 natoms = 0

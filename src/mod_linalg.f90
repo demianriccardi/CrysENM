@@ -135,7 +135,7 @@ if(allocated(C)) then
   endif
 else
   allocate(C(M,N),stat=ierr)
-  C = cmplx(0.0d0,0.0d0,kind = wp)
+  C = cmplx(0.0d0,0.0d0,kind = 8)
 endif
 
 call zgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
