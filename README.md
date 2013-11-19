@@ -26,7 +26,7 @@ Riccardi D., Cui Q., Phillips Jr. G. N.,
 
 
 
-    Copyright (C) 2013  Demian Riccardi 
+    Copyright (C) 2013  Demian Riccardi <demianriccardi@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
