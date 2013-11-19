@@ -4,7 +4,7 @@ CrysENM
 Fortran 90 toolkit for application of elastic network models to proteins in the crystalline state. 
 I wrote this as a NLM postdoctoral trainee in the laboratory of George N. Phillips, Jr from 2007-2010.  
 
-TODO: Refactor, reduce, write testing framework, DOCUMENT, and improve.  
+TODO:  Write testing framework, Refactor, DOCUMENT.  
 
 Dependencies: 
 
