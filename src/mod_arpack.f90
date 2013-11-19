@@ -721,9 +721,17 @@ subroutine av_sparse ( A, v, w )
 type(sparse), intent(IN) :: A       
 real(dp),pointer,intent(IN)      :: v(:)       
 real(dp),pointer,intent(out)     :: w(:)
+real(dp),parameter               :: beta = 0.0d0
+integer :: i
 
 !call mkl_dcsrsymv('U', n, a%values, a%rows, a%columns, v, w)
-call mkl_dcoosymv('U', a%ndim, a%values, a%rows, a%columns, a%nnzero, v, w)
+!call mkl_dcoosymv('U', a%ndim, a%values, a%rows, a%columns, a%nnzero, v, w)
+!call dcoosymv('U', a%ndim, a%values, a%rows, a%columns, a%nnzero, v, w)
+w(1:A%ndim)=beta
+
+do i=1,A%nnzero
+  w(A%rows(i))=w(A%rows(i))+A%zvalues(i)*v(A%columns(i))
+end do
 
 end subroutine
 
