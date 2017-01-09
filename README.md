@@ -10,8 +10,11 @@ Dependencies:
 
 
 1. ARPACK:   http://www.caam.rice.edu/software/ARPACK/
+    
 2. CrysFML:  http://www.ill.eu/other_sites/fullprof/php/programs24b7.html?pagina=Crysfml
-3. Lapack95: http://www.netlib.org/lapack95/
+    ```bash
+        svn checkout http://forge.epn-campus.eu/svn/crysfml 
+    ```
 
 I will push programs that use the library as I clean them up.  Contact me if you are interested!  
 A contact got me this far!
