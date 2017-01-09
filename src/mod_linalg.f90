@@ -142,42 +142,44 @@ call zgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
 
 end subroutine
 
-subroutine zheevr_zeig (nfirst,nlast,matin, &
-                             vals)
-use f95_lapack, only : la_heevr
+!subroutine zheevr_zeig (nfirst,nlast,matin, &
+!                             vals)
+!use f95_lapack, only : la_heevr
 ! slower pseudo inverse where identity matrix is converted to pseudo inverse
-integer        ,intent(in)               :: nfirst,nlast
-complex(kind=8),intent(in), allocatable  :: matin(:,:)
-real(dp),       intent(out),allocatable  :: vals(:)
-complex(dp),                    allocatable  :: A(:,:)
-real(dp),                       allocatable  :: w(:)
-integer                           :: ierr,ndim,nv,il,iu
-real(sp) :: time1,time2
+!integer        ,intent(in)               :: nfirst,nlast
+!complex(kind=8),intent(in), allocatable  :: matin(:,:)
+!real(dp),       intent(out),allocatable  :: vals(:)
+!complex(dp),                    allocatable  :: A(:,:), work(:)
+!real(dp),                       allocatable  :: rwork(:),w(:)
+!integer,                        allocatable  :: iwork(:)
+!integer                           :: ierr,ndim,nv,il,iu
+!real(sp) :: time1,time2
 
-il = nfirst
-iu = nlast
-nv = iu-il+1
-call cpu_time(time1)
-ndim=size(matin(1,:))
-print *, 'using zheevr to compute eigvals from:',il,' to ',iu
-print *, 'for matrix dimension:',ndim
-
-if (allocated(vals)) deallocate(vals)
-allocate(w(ndim),vals(nv),A(ndim,ndim),stat=ierr)
-if (ierr /= 0) STOP "*** not enough memory ***"
-
-A=matin
-
-call la_heevr(a,w,il=il,iu=iu)
-
-vals=w(1:nv)
-call cpu_time(time2)
-print *, 'time zheevr to compute eigvals from:',il,' to ',iu, ': ',time2-time1
+!il = nfirst
+!iu = nlast
+!nv = iu-il+1
+!call cpu_time(time1)
+!ndim=size(matin(1,:))
+!print *, 'using zheevr to compute eigvals from:',il,' to ',iu
+!print *, 'for matrix dimension:',ndim
 
 
-deallocate(a,w)
+!if (allocated(vals)) deallocate(vals)
+!allocate(w(ndim),vals(nv),A(ndim,ndim),stat=ierr)
+!if (ierr /= 0) STOP "*** not enough memory ***"
 
-end subroutine
+!A=matin
+
+!call la_heevr(a,w,il=il,iu=iu)
+
+!vals=w(1:nv)
+!call cpu_time(time2)
+!print *, 'time zheevr to compute eigvals from:',il,' to ',iu, ': ',time2-time1
+
+
+!deallocate(a,w)
+
+!end subroutine
 
 subroutine lapack_eig (matin, &
                              vals,vecs )

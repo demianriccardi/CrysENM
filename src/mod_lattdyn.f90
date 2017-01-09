@@ -12,10 +12,9 @@ module mod_lattdyn
 !
 !CrysFML modules
 use cfml_globaldeps,                  only: dp,sp
-use cfml_Atom_typedef,                only: Atom_List_Type
 use cfml_crystal_metrics,             only: Crystal_Cell_Type
 !external modules
-use mod_types,                only: inp_par,sparse,uc_list_type,asym_list_type
+use mod_types,                only: inp_par,sparse,protein_atom_list_type, uc_list_type,asym_list_type
 use mod_math,                 only: dist_sqr,distance
 use mod_constants,            only: one,two,zero,pi
 use mod_arpack
@@ -913,7 +912,7 @@ end subroutine
 
 subroutine dispersion_calc(input,cell,unit_cell,kirchoff,hessian,states,blocks)
 use mod_arpack,   only : mod_arpack_zndrv1 
-use mod_linalg,   only : lapack_zeig,zheevr_zeig 
+use mod_linalg,   only : lapack_zeig 
 use mod_types,    only : sparse,dos,dos_init,dos_append,dos_histgen
 use mod_math,     only : realrecip
 use mod_hessian,  only : eig_to_THZ
@@ -1720,8 +1719,8 @@ use mod_inout,     only : vect_atshrink
 use mod_crysbuild, only : atom_shrinker
 type(inp_par),        intent(in out) :: input
 type (Crystal_Cell_Type),intent(in) :: cell
-!type(atom_list_type), intent(in out) :: atoms
-type(atom_list_type)                 :: subatoms
+!type(protein_atom_list_type), intent(in out) :: atoms
+type(protein_atom_list_type)                 :: subatoms
 type(asym_list_type), intent(in out) :: unit_cell,asyms
 type (sparse)       , intent(in)     :: kirchoff,hessian
 real(dp), allocatable , intent(out)  :: vcov(:,:)
@@ -1838,7 +1837,7 @@ use mod_inout,     only : vect_atshrink,sparse_deinit
 use mod_crysbuild, only : atom_shrinker
 type(inp_par),        intent(in out) :: input
 type (Crystal_Cell_Type),intent(in) :: cell
-!type(atom_list_type), intent(in out) :: atoms
+!type(protein_atom_list_type), intent(in out) :: atoms
 type(asym_list_type), intent(in out) :: asyms, unit_cell
 type (sparse)       , intent(in out)     :: kirchoff,hessian
 real(dp), allocatable , intent(out)  :: vcov(:,:)

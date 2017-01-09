@@ -1,11 +1,23 @@
 module mod_types
-use cfml_atom_typedef,              only: atom_type,Atom_List_Type
+use cfml_atom_typedef,              only: atom_type, atom_list_type
+!init_atom_type
 use cfml_globaldeps,                 only: sp,dp
+
+!cdyn_atom_type
+type, extends(atom_type) :: Protein_Atom_Type
+  character(len=25)  :: resn=" "
+  integer            :: ires,iblock,iaunit,ichain
+end type Protein_Atom_Type
+
+Type, public :: Protein_Atom_List_Type
+    integer                                  :: natoms
+    type(Protein_Atom_Type),dimension(:),allocatable :: atom
+End type Protein_Atom_List_Type
 
 !b=sum_r/ndat - sum_c/ndat
 type :: Neigh_List_Type
   integer                                  :: nneighs
-  type(atom_list_Type),dimension(:),allocatable :: neigh
+  type(protein_atom_list_Type),dimension(:),allocatable :: neigh
   integer,dimension(2)                     :: aneigh,bneigh,cneigh ! range of neighbors 
                                               ! ie. -1 to 1 etc.. unit cell start is always
                                               ! zero so zero must be in series
@@ -13,7 +25,7 @@ end type Neigh_list_type
 
 type :: uc_Type ! need to remove this!
   integer                       :: naunits,natoms
-  type(Atom_Type), dimension(:), allocatable  :: atom 
+  type(Protein_Atom_Type), dimension(:), allocatable  :: atom 
   real(dp), dimension(3)        :: avec,bvec,cvec ! cartesian lattice vectors
   integer,dimension(2)          :: aneigh,bneigh,cneigh ! range of neighbors 
   integer                       :: nneighs ! total neighbors within cutoff
@@ -22,7 +34,7 @@ end type uc_type
 type :: asym_List_Type
   integer                                  :: naunits,natoms
   integer                                  :: nblocks ! contained in all asyms 
-  type(Atom_list_Type),dimension(:),allocatable :: aunit 
+  type(Protein_Atom_list_Type),dimension(:),allocatable :: aunit 
   real(dp), dimension(3) :: avec,bvec,cvec ! cartesian lattice vectors
   integer,dimension(2)   :: aneigh,bneigh,cneigh ! range of neighbors 
   integer                :: nneighs ! total neighbors within cutoff
@@ -120,6 +132,114 @@ type :: dos
 end type dos
 
 contains
+
+subroutine init_protein_atom_type (A)
+    type (Protein_Atom_Type), intent(in out)   :: A
+    A%resn = " "
+    A%ires = 0
+    A%iblock = 0
+    A%Lab      =" "
+    A%ChemSymb =" "
+    A%SfacSymb =" "
+    A%Wyck     ="."
+    A%Active   =.true.
+    A%Z        =0
+    A%Mult     =0
+    A%X        =0.0
+    A%X_Std    =0.0
+    A%MX       =0.0
+    A%LX       =0
+    A%Occ      =0.0
+    A%Occ_Std  =0.0
+    A%MOcc     =0.0
+    A%LOcc     =0
+    A%Biso     =0.0
+    A%Biso_std =0.0
+    A%MBiso    =0.0
+    A%LBiso    =0
+    A%Utype    ="none"
+    A%ThType   ="isotr"
+    A%U        =0.0
+    A%U_std    =0.0
+    A%Ueq      =0.0
+    A%MU       =0.0
+    A%LU       =0
+    A%Charge   =0.0
+    A%Moment   =0.0
+    A%Ind      =0
+    A%NVar     =0
+    A%VarF     =0.0
+    A%LVarF    =0
+    A%mVarF    =0.0
+    A%AtmInfo  ="None"
+    return
+end subroutine init_protein_atom_type
+
+Subroutine Allocate_protein_Atom_List(N,A)
+   !---- Arguments ----!
+   integer,               intent(in)       :: n  
+   type (protein_atom_list_type), intent(in out)   :: A  
+
+   !---- Local Variables ----!
+   integer :: i,ier
+
+   A%natoms = n
+   if (allocated(A%Atom)) deallocate(A%Atom)
+   allocate (A%atom(n),stat=ier)
+
+   do i=1,n
+      call init_protein_atom_type(A%atom(i))
+   end do
+
+   return
+End Subroutine Allocate_protein_atom_list
+
+subroutine inflate_atom_list (a,p)
+! there must be a better way than this...
+    type (atom_list_type), intent(in) :: a
+    type (protein_atom_list_type), intent(out) :: p
+    integer :: i
+
+    call Allocate_protein_Atom_List(a%natoms, p)
+
+    do i = 1, p%natoms
+        p%atom(i)%lab      = a%atom(i)%Lab 
+        p%atom(i)%ChemSymb = a%atom(i)%ChemSymb 
+        p%atom(i)%SfacSymb = a%atom(i)%SfacSymb
+        p%atom(i)%Wyck     = a%atom(i)%Wyck
+        p%atom(i)%Active   = a%atom(i)%Active 
+        p%atom(i)%Z        = a%atom(i)%Z       
+        p%atom(i)%Mult     = a%atom(i)%Mult    
+        p%atom(i)%X        = a%atom(i)%X       
+        p%atom(i)%X_Std    = a%atom(i)%X_Std   
+        p%atom(i)%MX       = a%atom(i)%MX      
+        p%atom(i)%LX       = a%atom(i)%LX      
+        p%atom(i)%Occ      = a%atom(i)%Occ     
+        p%atom(i)%Occ_Std  = a%atom(i)%Occ_Std 
+        p%atom(i)%MOcc     = a%atom(i)%MOcc    
+        p%atom(i)%LOcc     = a%atom(i)%LOcc    
+        p%atom(i)%Biso     = a%atom(i)%Biso    
+        p%atom(i)%Biso_std = a%atom(i)%Biso_std
+        p%atom(i)%MBiso    = a%atom(i)%MBiso   
+        p%atom(i)%LBiso    = a%atom(i)%LBiso   
+        p%atom(i)%Utype    = a%atom(i)%Utype   
+        p%atom(i)%ThType   = a%atom(i)%ThType  
+        p%atom(i)%U        = a%atom(i)%U       
+        p%atom(i)%U_std    = a%atom(i)%U_std   
+        p%atom(i)%Ueq      = a%atom(i)%Ueq     
+        p%atom(i)%MU       = a%atom(i)%MU      
+        p%atom(i)%LU       = a%atom(i)%LU      
+        p%atom(i)%Charge   = a%atom(i)%Charge  
+        p%atom(i)%Moment   = a%atom(i)%Moment  
+        p%atom(i)%Ind      = a%atom(i)%Ind     
+        p%atom(i)%NVar     = a%atom(i)%NVar    
+        p%atom(i)%VarF     = a%atom(i)%VarF    
+        p%atom(i)%LVarF    = a%atom(i)%LVarF   
+        p%atom(i)%mVarF    = a%atom(i)%mVarF   
+        p%atom(i)%AtmInfo  = a%atom(i)%AtmInfo 
+    end do               
+
+end subroutine inflate_atom_list
 
 subroutine dos_append(freqs,states)
 ! grows the array of frequencies

@@ -8,10 +8,9 @@ module mod_hessian
 !
 !CrysFML modules
 use cfml_globaldeps,                   only: dp,sp
-use cfml_Atom_typedef,                only: Atom_List_Type
 use cfml_crystal_metrics,              only: Crystal_Cell_Type
 !external modules
-use mod_types,                only: sparse,uc_list_type,asym_list_type,Neigh_List_Type,inp_par
+use mod_types,                only: sparse,uc_list_type,protein_atom_list_type,asym_list_type,Neigh_List_Type,inp_par
 !external modules
 use mod_constants,            only: one,two,zero,pi
 !use mod_inout
@@ -211,7 +210,7 @@ subroutine sparsehess_massweigh(input,atoms,matin,zd)
 use mod_types,     only : inp_par,sparse
 use mod_crysbuild, only : atom_mass_constr
 type(inp_par)       , intent(in)     :: input
-type(atom_list_type), intent(in)     :: atoms
+type(protein_atom_list_type), intent(in)     :: atoms
 type(sparse)        , intent(inout)  :: matin
 character(len=1)    , intent(in)     :: zd
 real(dp), allocatable :: atmasses(:),xyzmasses(:) 
@@ -240,7 +239,7 @@ subroutine fullhess_massweigh_d(input,atoms,matin)
 use mod_types,     only : inp_par,sparse
 use mod_crysbuild, only : atom_mass_constr
 type(inp_par)       , intent(in)     :: input
-type(atom_list_type), intent(in)     :: atoms
+type(protein_atom_list_type), intent(in)     :: atoms
 real(dp),allocatable, intent(inout)  :: matin(:,:)
 real(dp), allocatable :: atmasses(:),xyzmasses(:)
 real(dp) :: weight
@@ -267,7 +266,7 @@ subroutine fullhess_massweigh_z(input,atoms,matin)
 use mod_types,     only : inp_par,sparse
 use mod_crysbuild, only : atom_mass_constr
 type(inp_par)       , intent(in)     :: input
-type(atom_list_type), intent(in)     :: atoms
+type(protein_atom_list_type), intent(in)     :: atoms
 complex(dp),allocatable, intent(inout)  :: matin(:,:)
 real(dp), allocatable :: atmasses(:),xyzmasses(:)
 real(dp) :: weight
@@ -312,7 +311,7 @@ subroutine hess_weigh_byres (atoms,matin,matout,zd)
 use mod_types,     only: sparse
 use mod_inout,     only: sparse_refinit
 use mod_crysbuild, only: residue_masses
-type(atom_list_type), intent(in)     :: atoms
+type(protein_atom_list_type), intent(in)     :: atoms
 type(sparse),intent(in)           :: matin
 type(sparse),intent(out)          :: matout
 real(dp),allocatable                 :: atmasses(:),masses(:)
@@ -341,7 +340,7 @@ end subroutine
 
 subroutine hess_invrt_byres(atoms,invrtmasses)
 use mod_crysbuild, only: residue_masses
-type(atom_list_type), intent(in)     :: atoms
+type(protein_atom_list_type), intent(in)     :: atoms
 real(dp),allocatable, intent(out)    :: invrtmasses(:)
 real(dp),allocatable                 :: atmasses(:)
 
@@ -360,7 +359,7 @@ use mod_crysbuild, only : mass_weightit
 use mod_hessblock, only : sprnghessblock
 use mod_math,      only : distance
 type(inp_par)                 ,intent(in out)   :: input
-type(atom_List_Type)          ,intent(in)   :: molecule
+type(protein_atom_list_type)          ,intent(in)   :: molecule
 type(uc_List_Type)            ,intent(in)   :: asy_im
 type(neigh_List_Type)         ,intent(in)   :: crystal
 type(sparse)                  ,intent(out)  :: kirchoff_coor,hessian_coor

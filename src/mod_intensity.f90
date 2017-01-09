@@ -9,14 +9,15 @@ module mod_intensity
 ! compared with old code and cctbx and it seems to perform well
 ! checked for 1c1g, 2cba, 2tma it various hkls
 !
-! takes in atom_list_type in fractional coordinates
+! takes in protein_atom_list_type in fractional coordinates
 !       
-use cfml_Atom_typedef,                only: Atom_List_Type 
+!use cfml_Atom_typedef,                only: Atom_List_Type 
 use cfml_Scattering_Chemical_Tables, only: xray_form_type,Xray_Form,set_xray_form
 use cfml_crystal_metrics,              only: Crystal_Cell_Type
 use cfml_String_Utilities,           only: l_case
 use cfml_Reflections_Utilities
 use mod_constants
+use mod_types,                  only: inp_par,protein_atom_list_type
 
 implicit none
 integer                           :: hstart,hstop,kstart,kstop,lstart,lstop
@@ -66,11 +67,10 @@ public :: hstart,hstop,kstart,kstop,lstart,lstop,intensity_calc,atscatter
 contains
 
 subroutine intensity_calc(input,cell,atoms,vcov,int_thrx,int_thr,int_exp)
-use mod_types,                  only: inp_par
 use mod_crysbuild,              only: cart_to_fract, fract_to_cart
 type(inp_par),           intent(in)   :: input
 type (Crystal_Cell_Type),intent(in)   :: Cell
-type(atom_list_type)    ,intent(in out)   :: atoms
+type(protein_atom_list_type)    ,intent(in out)   :: atoms
 real(dp),allocatable,    intent(in)   :: vcov(:,:)
 real(dp),allocatable,    intent(out)  :: int_thrx(:,:,:),int_thr(:,:,:),int_exp(:,:,:)
 integer                     :: reflcts(6)!hstart,hstop,kstart,kstop,lstart,lstop
@@ -90,7 +90,7 @@ end subroutine
 subroutine mod_intensity_setup(reflcts,atoms,cell) 
 
 integer                 ,intent(in)   :: reflcts(6)
-type(atom_list_type)    ,intent(in)   :: atoms
+type(protein_atom_list_type)    ,intent(in)   :: atoms
 type (Crystal_Cell_Type),intent(in)   :: Cell
 real(sp)                              :: iort(3,3)
 integer :: i,j,h,k,l !,hstart,hstop,kstart,kstop,lstart,lstop
@@ -115,11 +115,10 @@ end subroutine
 subroutine direct_iso(input,cell,atoms,vcov_in,int_thrx,int_thr,int_exp)
 ! computes the intensity for the globally defined recip latt indices
 ! takes in vcov as Angstroms ^2.  
-use mod_types,                  only: inp_par
 use mod_crysbuild,              only: cart_to_fract, fract_to_cart
 type (inp_par),intent(in)             :: input
 type (Crystal_Cell_Type),intent(in)   :: Cell
-type(atom_list_type),    intent(inout)   :: atoms !fractional cartesian
+type(protein_atom_list_type),    intent(inout)   :: atoms !fractional cartesian
 real(DP), intent(in), allocatable     :: vcov_in(:,:)
 real(DP), intent(out), allocatable    :: int_thrx(:,:,:),int_thr(:,:,:),int_exp(:,:,:)
 real(DP), allocatable                 :: coor(:,:),occ(:),&
@@ -243,10 +242,9 @@ subroutine direct_aniso(input,cell,atoms,vcov_in,int_thrx,int_thr,int_exp)
 ! computes the intensity for the globally defined recip latt indices
 ! DMR: I think that can be sped up.  The attscat lib may be slowing it down
 !      due to the dimensionality.
-use mod_types,                  only: inp_par
 type(inp_par),           intent(in)   :: input
 type (Crystal_Cell_Type),intent(in)   :: Cell
-type(atom_list_type),    intent(in)   :: atoms
+type(protein_atom_list_type),    intent(in)   :: atoms
 real(DP), intent(in), allocatable     :: vcov_in(:,:)
 real(DP), intent(out), allocatable    :: int_thrx(:,:,:),int_thr(:,:,:),int_exp(:,:,:)
 real(DP), allocatable                 :: coor(:,:),occ(:),bfact(:),bfact_thr(:)
@@ -423,10 +421,9 @@ subroutine zdirect_aniso(input,cell,atoms,zvcov,int_thrx,int_thr,int_exp)
 ! computes the intensity for the globally defined recip latt indices
 ! ! old subroutine kept for future reference
 ! uses complex vcov matrix..  vcov is not complex if the BZ is sampled correctly
-use mod_types,                  only: inp_par
 type(inp_par),           intent(in)   :: input
 type (Crystal_Cell_Type),intent(in)   :: Cell
-type(atom_list_type),    intent(in)   :: atoms
+type(protein_atom_list_type),    intent(in)   :: atoms
 complex(kind=8), intent(in), allocatable  :: zvcov(:,:)
 real(DP), intent(out), allocatable    :: int_thrx(:,:,:),int_thr(:,:,:),int_exp(:,:,:)
 real(DP)                              :: coor(atoms%natoms,3),occ(atoms%natoms),bfact(atoms%natoms)
@@ -583,7 +580,7 @@ end subroutine
 subroutine uniqat(atoms,ityp)
 ! uses global smllatlib for now
 ! 11-10-2007: works
-type(atom_list_type),intent(in)       :: atoms
+type(protein_atom_list_type),intent(in)       :: atoms
 integer, allocatable,    intent(out)  :: ityp(:)
 Type(Xray_Form_Type),    allocatable  :: tmpatlib(:)
 character(5)                          :: tmpat1,tmpat2
@@ -750,7 +747,6 @@ end subroutine
 
 ! below this is new as of 012009
 subroutine reflection_setup (input,cell,reflects)
-use mod_types, only : inp_par
 type(inp_par),     intent(in)  :: input
 type(reflections), intent(out) :: reflects
 type (Crystal_Cell_Type), intent(in)        :: Cell
@@ -825,7 +821,6 @@ end do
 end subroutine
 
 subroutine reflection_setup_resolution (input,res_angs,cell,reflects)
-use mod_types, only : inp_par
 type(inp_par),            intent(in)   :: input
 real(dp),                 intent(in)   :: res_angs
 type (Crystal_Cell_Type), intent(in)   :: Cell
@@ -943,7 +938,7 @@ end function
 
 subroutine uniqat_new(atoms,smllatlib_new,atomic_scatt)
 ! DMR 01-21-2009
-type(atom_list_type),intent(in)       :: atoms
+type(protein_atom_list_type),intent(in)       :: atoms
 type(Xray_Form_Type),allocatable, intent(out)  :: smllatlib_new(:) ! global subset of atomlib5(:) 
 type(atscatter),intent(out)           :: atomic_scatt 
 Type(Xray_Form_Type),    allocatable  :: tmpatlib(:)
@@ -1144,9 +1139,8 @@ end if
 end function
 
 subroutine reflections_atscatt_setup(input,atoms,cell,reflects,atomic_scatt)
-use mod_types , only: inp_par
 type(inp_par), intent(in)  :: input
-type(atom_list_type)    ,intent(in)   :: atoms
+type(protein_atom_list_type)    ,intent(in)   :: atoms
 type (Crystal_Cell_Type),intent(in)   :: Cell
 type(reflections),       intent(out)  :: reflects
 type(atscatter),         intent(out)  :: atomic_scatt 
@@ -1168,12 +1162,11 @@ deallocate(smllatlib_new)
 end subroutine
 
 subroutine reflections_atscatt_setres(input,res,spg,atoms,cell,reflects,atomic_scatt)
-use mod_types ,                 only: inp_par
 use cfml_crystallographic_symmetry,  only: space_group_type
 type(inp_par),            intent(in)   :: input
 real(dp),                 intent(in)   :: res
 type (Space_Group_Type) , intent(in)   :: spg
-type(atom_list_type)    , intent(in)   :: atoms
+type(protein_atom_list_type)    , intent(in)   :: atoms
 type (Crystal_Cell_Type), intent(in)   :: Cell
 type(reflections),        intent(out)  :: reflects
 type(atscatter),          intent(out)  :: atomic_scatt
@@ -1196,12 +1189,11 @@ deallocate(smllatlib_new)
 end subroutine
 
 subroutine reflections_atscatt_setbig(input,res,spg,atoms,cell,reflects,atomic_scatt)
-use mod_types ,                 only: inp_par
 use cfml_crystallographic_symmetry,  only: space_group_type
 type(inp_par),            intent(in)   :: input
 real(dp),                 intent(in)   :: res
 type (Space_Group_Type) , intent(in)   :: spg
-type(atom_list_type)    , intent(in)   :: atoms
+type(protein_atom_list_type)    , intent(in)   :: atoms
 type (Crystal_Cell_Type), intent(in)   :: Cell
 type(reflections),        intent(out)  :: reflects
 type(atscatter),          intent(out)  :: atomic_scatt
@@ -1226,9 +1218,8 @@ end subroutine
 
 
 subroutine atscatt_setup(qvec,atoms,reflects,atomic_scatt)
-use mod_types , only: inp_par
 real(dp)                ,intent(in)   :: qvec(3)
-type(atom_list_type)    ,intent(in)   :: atoms
+type(protein_atom_list_type)    ,intent(in)   :: atoms
 type(reflections),       intent(in)   :: reflects
 type(atscatter),         intent(out)  :: atomic_scatt 
 type(Xray_Form_Type),allocatable      :: smllatlib_new(:) 
@@ -1252,10 +1243,9 @@ subroutine exp_structure_factor(input,cell,atoms,reflects,atomic_scatt,struct_fa
 ! uses bfactor which 8pi^2*flucts in angs
 ! |F_hkl| = dsqrt(costerm*costerm + sinterm*sinterm)
 ! theta   = atan(sinterm/costerm)*180.d0/pi
-use mod_types , only: inp_par
 type(inp_par),              intent(in)      :: input
 type (Crystal_Cell_Type),   intent(in)      :: Cell
-type(atom_list_type),       intent(inout)   :: atoms
+type(protein_atom_list_type),       intent(inout)   :: atoms
 type(reflections),          intent(in)      :: reflects
 type(atscatter),            intent(in)      :: atomic_scatt
 complex(kind=8),allocatable,intent(out)     :: struct_fact(:)
@@ -1297,7 +1287,7 @@ subroutine intensity_zero_aniso(atoms,reflects,aniso,atomic_scatt, &
 !    our old intensity calc... all good
 !    the phases work too, off by some rotes but seemed ok via cctbx
 use mod_vcov_store
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 real(dp)        , allocatable,  intent(in)  :: aniso(:,:)
 type(atscatter),            intent(in)      :: atomic_scatt
@@ -1342,8 +1332,7 @@ subroutine blocks_Fsqr(atoms,reflects,atomic_scatt,blocks)
 ! DMR added Oct 1, 2009
 ! what does it do asshole!
 use mod_bnm,  only: block
-use mod_types, only: inp_par
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 type(atscatter),            intent(in)      :: atomic_scatt
 type(block),    allocatable,intent(inout)   :: blocks(:)
@@ -1380,9 +1369,8 @@ end subroutine
 subroutine atself_diffscat_aniso(input,atoms,reflects,aniso,atomic_scatt)
 ! DMR added Oct 1, 2009
 use mod_vcov_store
-use mod_types, only: inp_par
 type(inp_par), intent(in)                   :: input
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 real(dp)        , allocatable,  intent(in)  :: aniso(:,:)
 type(atscatter),            intent(in)      :: atomic_scatt
@@ -1431,7 +1419,6 @@ end subroutine
 subroutine blockself_diffscat_iso(input,blocks,reflects,iso)
 ! DMR added Oct 1, 2009
 use mod_bnm, only: block
-use mod_types, only: inp_par
 type(inp_par), intent(in)                   :: input
 type(block)  ,allocatable,  intent(in)      :: blocks(:)
 type(reflections),          intent(in)      :: reflects
@@ -1474,7 +1461,6 @@ end subroutine
 subroutine blockself_diffscat_aniso(input,blocks,reflects,aniso)
 ! DMR added Oct 1, 2009
 use mod_bnm, only: block
-use mod_types, only: inp_par
 type(inp_par), intent(in)                   :: input
 type(block)  ,allocatable,  intent(in)      :: blocks(:)
 type(reflections),          intent(in)      :: reflects
@@ -1524,7 +1510,7 @@ end subroutine
 subroutine intensity_vcov(atoms,reflects,vcov_cross,atomic_scatt, &
                            intensity,anisoin)
 use mod_vcov_store
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: vcov_cross(:,:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -1610,9 +1596,8 @@ end subroutine
 subroutine diffscat_vcov(input,atoms,reflects,vcov_cross,atomic_scatt, &
                            anisoin)
 use mod_vcov_store
-use mod_types, only: inp_par
 type(inp_par),              intent(in)           :: input
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: vcov_cross(:,:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -1707,10 +1692,9 @@ subroutine block_diffscat_vcov(input,blocks,atoms,reflects,vcov_cross,atomic_sca
                            anisoin)
 use mod_vcov_store
 use mod_bnm, only: block
-use mod_types, only: inp_par
 type(inp_par),              intent(in)           :: input
 type(block),allocatable,    intent(in)           :: blocks(:)
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: vcov_cross(:,:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -1813,10 +1797,9 @@ subroutine block_diffscat_vcov_iso(input,blocks,atoms,reflects,isovcov,atomic_sc
                            isoin,blockn)
 use mod_vcov_store
 use mod_bnm, only: block
-use mod_types, only: inp_par
 type(inp_par),              intent(in)           :: input
 type(block),allocatable,    intent(in)           :: blocks(:)
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: isovcov(:,:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -1913,7 +1896,7 @@ end subroutine
 subroutine intensity_vcov_iso(atoms,reflects,isovcov,atomic_scatt, &
                            intensity,isoin)
 use mod_vcov_store
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: isovcov(:,:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -1989,9 +1972,8 @@ end subroutine
 subroutine diffscat_vcov_iso(input,atoms,reflects,isovcov,atomic_scatt, &
                            isoin)
 use mod_vcov_store
-use mod_types, only: inp_par
 type(inp_par), intent(in) :: input
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: isovcov(:,:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -2074,9 +2056,8 @@ subroutine atself_diffscat_iso(input,atoms,reflects,iso,atomic_scatt)
 ! DMR added Oct 1, 2009
 ! takes atomic fluctuations (isoin) in angstrom
 use mod_vcov_store
-use mod_types, only: inp_par
 type(inp_par), intent(in) :: input
-type(atom_list_type),       intent(in)           :: atoms
+type(protein_atom_list_type),       intent(in)           :: atoms
 type(reflections),          intent(in)           :: reflects
 real(dp), allocatable,       intent(in)          :: iso(:)
 type(atscatter),            intent(in)           :: atomic_scatt
@@ -2121,7 +2102,7 @@ end subroutine
 subroutine intensity_vcov_test(atoms,reflects,vcov_self,vcov_blocks,atomic_scatt, &
                            intensity)
 use mod_vcov_store
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 real(dp), allocatable,       intent(in)      :: vcov_self(:,:),vcov_blocks(:,:)
 type(atscatter),            intent(in)      :: atomic_scatt
@@ -2187,7 +2168,7 @@ subroutine intensity_zero_iso(atoms,reflects,flucts,atomic_scatt, &
 !    the phases work too, off by some rotes but seemed ok via cctbx
 ! |F_hkl| = dsqrt(costerm*costerm + sinterm*sinterm)
 ! theta   = atan(sinterm/costerm)*180.d0/pi
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 real(dp)   ,  allocatable,  intent(in)      :: flucts(:)
 type(atscatter),            intent(in)      :: atomic_scatt
@@ -2223,12 +2204,11 @@ subroutine intensity_one(input, atoms,reflects,branches,aniso, &
 ! need to bring in the eigvecs/vals and associated qvec... datatype: bybranch_vals_vecs 
 ! construct the atomic_scatt with wavevector from bybranch 
 ! 
-use mod_types,            only: inp_par
 use cfml_crystal_metrics,        only: Crystal_Cell_Type
 use mod_valvec_store
 use mod_constants, only: Rkcal,one,two,pi
 type(inp_par),              intent(in)      :: input
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 type(valvec),               intent(in)      :: branches
 real(dp)        , allocatable,  intent(in)  :: aniso(:,:)
@@ -2292,12 +2272,11 @@ subroutine intensity_one_test(input, atoms,reflects,branches,aniso, &
 ! need to bring in the eigvecs/vals and associated qvec... datatype: bybranch_vals_vecs 
 ! construct the atomic_scatt with wavevector from bybranch 
 ! 
-use mod_types,            only: inp_par
 use cfml_crystal_metrics,        only: Crystal_Cell_Type
 use mod_valvec_store
 use mod_constants, only: Rkcal,one,two,pi
 type(inp_par),              intent(in)      :: input
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 type(valvec),               intent(in)      :: branches
 real(dp)        , allocatable,  intent(in)  :: aniso(:,:)
@@ -2360,12 +2339,11 @@ subroutine intensity_one_meinhold(input, atoms,reflects,branches,aniso, &
 ! need to bring in the eigvecs/vals and associated qvec... datatype: bybranch_vals_vecs 
 ! construct the atomic_scatt with wavevector from bybranch 
 ! 
-use mod_types,            only: inp_par
 use cfml_crystal_metrics,        only: Crystal_Cell_Type
 use mod_valvec_store
 use mod_constants, only: Rkcal,one,two,pi
 type(inp_par),              intent(in)      :: input
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 type(valvec),               intent(in)      :: branches
 real(dp)        , allocatable,  intent(in)  :: aniso(:,:)
@@ -2430,12 +2408,11 @@ subroutine intensity_one_testold(input, atoms,reflects,branches,aniso, &
 ! need to bring in the eigvecs/vals and associated qvec... datatype: bybranch_vals_vecs 
 ! construct the atomic_scatt with wavevector from bybranch 
 ! 
-use mod_types,            only: inp_par
 use cfml_crystal_metrics,        only: Crystal_Cell_Type
 use mod_valvec_store
 use mod_constants, only: Rkcal,one,two,pi
 type(inp_par),              intent(in)      :: input
-type(atom_list_type),       intent(in)      :: atoms
+type(protein_atom_list_type),       intent(in)      :: atoms
 type(reflections),          intent(in)      :: reflects
 type(valvec),               intent(in)      :: branches
 real(dp)        , allocatable,  intent(in)  :: aniso(:,:)

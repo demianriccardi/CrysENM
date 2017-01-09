@@ -9,10 +9,10 @@ module mod_inout
 ! pdbanimate(atoms_in,dispvec,freq,nframe)
 
 ! crysFML modules
-use cfml_atom_typedef,              only: Atom_List_Type
 use cfml_globaldeps,                 only: sp,dp
 ! external modules
-use mod_types,                only: inp_par, uc_list_type,asym_list_type,Neigh_List_Type
+use mod_types, only: inp_par, uc_list_type,asym_list_type,Neigh_List_Type, & 
+                     init_protein_atom_type, protein_atom_list_type
 use mod_constants,            only: zero,one,two,pi
 
 implicit none
@@ -71,7 +71,7 @@ end function
 subroutine aniso_atshrink(input,atoms,aniso_in,aniso_out)
 ! take big aniso and select out parts that we want
 type(inp_par),intent(in)           :: input
-type(atom_list_type),intent(in)    :: atoms
+type(protein_atom_list_type),intent(in)    :: atoms
 real(dp), allocatable, intent(in)  :: aniso_in(:,:)
 real(dp), allocatable, intent(out) :: aniso_out(:,:)
 integer :: nat, i,j,ii,jj,h,hh,k,kk,l,m,ialloc,ndim,mult
@@ -124,7 +124,7 @@ end subroutine
 subroutine vcov_atshrink(input,atoms,vcov_in,vcov_out)
 ! take big vcov and select out parts that we want
 type(inp_par),intent(in)           :: input
-type(atom_list_type),intent(in)    :: atoms
+type(protein_atom_list_type),intent(in)    :: atoms
 real(dp), allocatable, intent(in)  :: vcov_in(:,:)
 real(dp), allocatable, intent(out) :: vcov_out(:,:)
 integer :: nat, i,j,ii,jj,h,hh,k,kk,l,m,ialloc,ndim,mult
@@ -191,7 +191,7 @@ end subroutine
 subroutine isovcov_atshrink(input,atoms,vcov_in,vcov_out)
 ! take big vcov and select out parts that we want
 type(inp_par),intent(in)           :: input
-type(atom_list_type),intent(in)    :: atoms
+type(protein_atom_list_type),intent(in)    :: atoms
 real(dp), allocatable, intent(in)  :: vcov_in(:,:)
 real(dp), allocatable, intent(out) :: vcov_out(:,:)
 integer :: nat, i,j,ii,jj,h,hh,k,kk,l,m,ialloc,ndim,mult
@@ -239,7 +239,7 @@ end subroutine
 
 subroutine vect_atshrink(input,atoms,tmp_atvecs,atvecs)
 type(inp_par),intent(in)           :: input
-type(atom_list_type),intent(in)    :: atoms
+type(protein_atom_list_type),intent(in)    :: atoms
 real(dp), allocatable, intent(in)  :: tmp_atvecs(:,:)
 real(dp), allocatable, intent(out) :: atvecs(:,:)
 integer :: nat, i,j,ii,jj,k,ll,ialloc,ndim,mult
@@ -368,7 +368,7 @@ end subroutine
 subroutine psfwriter (kirchoff,atoms_in,filpdb)
 use mod_types, only: sparse
 type (sparse),           intent(in) :: kirchoff
-type (Atom_list_Type),   intent(in) :: atoms_in
+type (protein_atom_list_type),   intent(in) :: atoms_in
 character(*)                        :: filpdb
 integer                             :: i,j,ier
 
@@ -422,7 +422,7 @@ close(11)
 end subroutine
 
 subroutine pdbwriter_atom (atoms_in,filpdb)
-type (Atom_list_Type),   intent(in) :: atoms_in
+type (protein_atom_list_type),   intent(in) :: atoms_in
 character(*)                        :: filpdb
 integer                             :: i,ier
 
@@ -447,7 +447,7 @@ close(11)
 end subroutine
 
 subroutine xyzwriter_atom (atoms_in,filpdb)
-type (Atom_list_Type),   intent(in) :: atoms_in
+type (protein_atom_list_type),   intent(in) :: atoms_in
 character(*)                        :: filpdb
 integer                             :: i,ier
 
@@ -464,7 +464,7 @@ close(11)
 end subroutine
 
 subroutine pdbwriter (atoms_in,filpdb)
-type (Atom_list_Type),   intent(in) :: atoms_in
+type (protein_atom_list_type),   intent(in) :: atoms_in
 character(*)                        :: filpdb
 integer                             :: i,ier
 
@@ -704,9 +704,8 @@ close(11)
 end subroutine
 
 subroutine asym_to_atom (uc_asym,unit_cell)
-use cfml_atom_typedef,              only: Atom_List_Type,init_atom_type
 type (asym_List_Type),   intent(in)  :: uc_asym
-type (Atom_list_Type),   intent(out) :: unit_cell
+type (protein_atom_list_type),   intent(out) :: unit_cell
 integer :: i,j,natoms,nat,ier
 
 natoms = uc_asym%naunits*uc_asym%aunit(1)%natoms
@@ -714,7 +713,7 @@ unit_cell%natoms=natoms
 allocate (unit_cell%atom(unit_cell%natoms),stat=ier)
 print *, "number of atoms:", natoms
 do i=1,natoms
-   call init_atom_type(unit_cell%atom(i))
+   call init_protein_atom_type(unit_cell%atom(i))
 end do
 
 nat = 0
@@ -854,7 +853,7 @@ subroutine pdbanimate(input,atoms_in,dispvec,freq,nframe,filpdb)
 use mod_types, only: inp_par 
 use cfml_scattering_chemical_tables, only: get_atomic_mass
 type(inp_par)        , intent(in) :: input            
-type (Atom_list_Type), intent(in) :: atoms_in
+type (protein_atom_list_type), intent(in) :: atoms_in
 real(dp), allocatable, intent(in) :: dispvec(:)          
 real(dp),              intent(in) :: freq
 integer,               intent(in) :: nframe

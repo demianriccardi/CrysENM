@@ -4,7 +4,7 @@ module mod_kirchoff
 ! subroutines to construct kirchoff matrix
 ! 
 !   input: 
-!       molecule config : atom_list_type, neigh_list_type, uc_list_type
+!       molecule config : protein_atom_list_type, neigh_list_type, uc_list_type
 !       pbc type        : def, asy, pbc
 !       fcnst,rcut
 !   
@@ -40,10 +40,9 @@ module mod_kirchoff
 !
 !CrysFML modules
 use cfml_globaldeps,                   only: dp,sp
-use cfml_Atom_typedef,                only: Atom_List_Type
 use cfml_crystal_metrics,              only: Crystal_Cell_Type
 !external modules
-use mod_types,                only: inp_par,sparse,asym_list_type,uc_list_type,Neigh_List_Type
+use mod_types,                only: inp_par,sparse,protein_atom_list_type,asym_list_type,uc_list_type,Neigh_List_Type
 use mod_math,                 only: dist_sqr
 use mod_constants,            only: one,two,zero,pi
 use mod_inout,  only: sparse_deinit,full_to_sparse,sparse_distances,matrx2d_init
@@ -219,7 +218,7 @@ end do
 end subroutine
 
 integer function nresidues(atoms) 
-type(atom_List_Type)       ,intent(in)      :: atoms
+type(protein_atom_list_type)       ,intent(in)      :: atoms
 integer :: i,j,ires
 
 ires = atoms%atom(1)%ires
@@ -240,7 +239,7 @@ subroutine kirchoff_un (input,molecule, &
 use mod_math, only: distance
 ! inout
 type(inp_par)       ,intent(in)   :: input
-type(atom_List_Type) ,intent(in)  :: molecule
+type(protein_atom_list_type) ,intent(in)  :: molecule
 real(dp),allocatable ,intent(out) :: kirchoff(:,:),distances(:,:),tab_dxyzs(:,:,:)
 ! internal
 real(dp)                          :: dist,dxyz(3),xyzi(3),xyzj(3)
@@ -277,7 +276,7 @@ subroutine matdist_atom (input,molecule, &
 use mod_math, only: distance
 ! inout
 type(inp_par)       ,intent(in)   :: input
-type(atom_List_Type) ,intent(in)  :: molecule
+type(protein_atom_list_type) ,intent(in)  :: molecule
 real(dp),allocatable ,intent(out) :: distances(:,:)
 ! internal
 real(dp)                          :: dist,dxyz(3),xyzi(3),xyzj(3)

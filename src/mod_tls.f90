@@ -3,8 +3,7 @@ module mod_tls
 !
 ! contains subroutines for reading in TLS tensors and constructing the projection matrix 
 ! uses the block datatype      
-use cfml_Atom_typedef,                only: Atom_List_Type 
-use mod_types,                        only: sparse
+use mod_types,                        only: sparse, protein_atom_list_type
 use mod_constants
 use mod_bnm
 use cfml_crystal_metrics,            only: Crystal_Cell_Type
@@ -34,7 +33,7 @@ contains
 subroutine tls_vcov(input,asym_un,vcov)
 use mod_types,  only: inp_par
 type(inp_par),            intent(in)     :: input
-type(atom_list_type),     intent(in out) :: asym_un 
+type(protein_atom_list_type),     intent(in out) :: asym_un 
 real(dp),    allocatable, intent(out)    :: vcov(:,:)
 type(block), allocatable                 :: blocks(:)
 
@@ -47,7 +46,7 @@ subroutine tls_block_setup(input,atoms,blocks)
 use mod_types,  only: inp_par
 use mod_linalg, only: invrse_mat,lapack_eig3
 type(inp_par),           intent(in)    :: input
-type(atom_list_type),     intent(inout)    :: atoms
+type(protein_atom_list_type),     intent(inout)    :: atoms
 type(block), allocatable,intent(out)   :: blocks(:)
 integer :: blck,i,j
 real(dp), allocatable :: atvcov(:,:)
@@ -206,7 +205,7 @@ use mod_types, only: inp_par
 use mod_linalg, only: lapack_eig
 use mod_math,   only: determ3
 type(inp_par),           intent(in)    :: input
-type(atom_list_type),     intent(inout)    :: atoms
+type(protein_atom_list_type),     intent(inout)    :: atoms
 type(block), allocatable,intent(out)   :: blocks(:)
 character(len=3) :: chartls
 character(len=20) :: charints,crap
@@ -441,7 +440,7 @@ end subroutine
 subroutine res_to_atom_block(atoms,inti,intj,iblock,natoms)
 ! take in residue range and set the blocks for atoms within that residue
 ! tls lists by residue
-type(atom_list_type), intent(inout) :: atoms
+type(protein_atom_list_type), intent(inout) :: atoms
 integer, intent(in)  :: inti,intj,iblock
 integer, intent(out) :: natoms
 integer :: i
@@ -559,7 +558,7 @@ end subroutine
 subroutine tlsblock_writeout(input,atoms,blocks)
 use mod_types,  only: inp_par
 type(inp_par) ,           intent(in) :: input
-type(atom_list_type),     intent(in) :: atoms
+type(protein_atom_list_type),     intent(in) :: atoms
 type(block), allocatable, intent(in) :: blocks(:)
 integer :: i,ier
 

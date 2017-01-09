@@ -3,6 +3,7 @@ module mod_tempfact
 ! this code needs to be cleaned up and commented
 use cfml_globaldeps,                 only: dp,sp
 use mod_constants
+use mod_types, only : inp_par, protein_atom_list_type
 
 implicit none
 type :: fluct_aniso
@@ -33,7 +34,6 @@ contains
 !     subroutine  fluct_x_scalar
 !     subroutine  z_nm_flucts
 subroutine fluct_real_init(input,flucts)
-use mod_types, only : inp_par
 type(inp_par), intent(in) :: input
 type(fluctuations), intent(out) :: flucts
 integer :: i,j,k,ialloc
@@ -191,12 +191,11 @@ end subroutine
 subroutine vcov_Bscale(input,mol_biso,vcov,correl,fcnst,nviab)
 use mod_types,                only: inp_par,isoaniso
 use mod_math,                 only: analyt_lsq,analyt_lsq_offset,linear_correl
-use  cfml_Atom_typedef,       only: Atom_List_Type
 ! DMR: 02-20-2008
 ! take in only the asym_unit, since the vcov is periodic with asym units
 ! use bfactors for atoms with 1.0 occupancy as did dkon
 type (inp_par)   ,        intent(in out)    :: input
-type(atom_list_type) ,intent(in)  :: mol_biso
+type(protein_atom_list_type) ,intent(in)  :: mol_biso
 real(dp), allocatable,intent(in out)  :: vcov(:,:)
 real(dp)             ,intent(out) :: correl,fcnst
 integer              ,intent(out) :: nviab
@@ -256,13 +255,12 @@ end subroutine
 subroutine bfactor_scale(input,mol_biso,thr_iso,&
                             bfexp,bfthr,resid,correl,fcnst,b,nviab,offsetin)
 use mod_math,                 only: analyt_lsq,analyt_lsq_offset,linear_correl
-use  cfml_Atom_typedef,       only: Atom_List_Type
 use mod_types,                only: inp_par
 ! DMR: 11-17-2009
 ! take in asym_unit
 ! use bfactors for atoms with 1.0 occupancy 
 type(inp_par),        intent(inout)  :: input
-type(atom_list_type) ,intent(in)  :: mol_biso
+type(protein_atom_list_type) ,intent(in)  :: mol_biso
 real(dp), allocatable,intent(in)  :: thr_iso(:)
 real(dp)             ,intent(out) :: correl,fcnst,b
 integer              ,intent(out) :: nviab
@@ -298,13 +296,12 @@ subroutine aniso_analysis(input,mol_biso,thr_aniso, &
             avg_expaniso,avg_thraniso,avg_dotab,avg_ccmod,avg_suij,&
             std_expaniso,std_thraniso,std_dotab,std_ccmod,std_suij,navg)
 use mod_math,                 only: analyt_lsq,analyt_lsq_offset,linear_correl
-use  cfml_Atom_typedef,       only: Atom_List_Type
 use mod_types,                only: inp_par
 ! DMR: 11-17-2009
 ! take in asym_unit
 ! use bfactors for atoms with 1.0 occupancy 
 type(inp_par),        intent(inout)  :: input
-type(atom_list_type) ,intent(in)     :: mol_biso
+type(protein_atom_list_type) ,intent(in)     :: mol_biso
 real(dp), allocatable,intent(in)     :: thr_aniso(:,:)
 integer,  allocatable ,intent(out)   :: resid(:)
 real(dp), allocatable ,intent(out)   :: expanisotropy(:),thranisotropy(:),&
@@ -345,11 +342,10 @@ call aniso_analysis_avgstd(expanisotropy,thranisotropy,dotab,ccmod,suij, &
 end subroutine
 
 subroutine getbf_occ1(input,mol_biso,thr_iso,bfexp,bfthr,resid,nviab)
-use  cfml_Atom_typedef,       only: Atom_List_Type
 use mod_types,                only: inp_par
 ! first let's get all occ one's into arrays
 type(inp_par),        intent(in)  :: input
-type(atom_list_type) ,intent(in)  :: mol_biso
+type(protein_atom_list_type) ,intent(in)  :: mol_biso
 real(dp), allocatable,intent(in)  :: thr_iso(:)
 real(dp), allocatable,intent(out) :: bfexp(:),bfthr(:)
 integer,  allocatable,intent(out) :: resid(:)
@@ -395,7 +391,6 @@ end subroutine
 subroutine aniso_analysis_avgstd(expaniso,thraniso,dotab,ccmod,suij, &
                              avg_expaniso,avg_thraniso,avg_dotab,avg_ccmod,avg_suij, &
                              std_expaniso,std_thraniso,std_dotab,std_ccmod,std_suij,navg)
-use  cfml_Atom_typedef,           only: Atom_List_Type
 use mod_types,                only: inp_par
 use mod_math,                 only: vec_avg_std
 ! DMR: 11-17-2009
@@ -483,11 +478,10 @@ end subroutine
 
 
 subroutine getaniso_occ1(input,mol_biso,thr_aniso,aniso_exp,aniso_thr,resid,nviab)
-use  cfml_Atom_typedef,       only: Atom_List_Type
 use mod_types,                only: inp_par
 ! first let's get all occ one's into arrays
 type(inp_par),        intent(in)  :: input
-type(atom_list_type) ,intent(in)  :: mol_biso
+type(protein_atom_list_type) ,intent(in)  :: mol_biso
 real(dp), allocatable,intent(in)  :: thr_aniso(:,:)
 real(dp), allocatable,intent(out) :: aniso_exp(:,:),aniso_thr(:,:)
 integer,  allocatable,intent(out) :: resid(:)
@@ -554,11 +548,10 @@ resid     = tmpresid(1:3*nviab) ; deallocate(tmpresid)
 end subroutine
 
 subroutine get_expaniso(input,mol_biso,aniso_exp)
-use  cfml_Atom_typedef,              only: Atom_List_Type
 use mod_types,                only: inp_par
 ! first let's get all occ one's into arrays
 type(inp_par),        intent(in)  :: input
-type(atom_list_type) ,intent(in)  :: mol_biso
+type(protein_atom_list_type) ,intent(in)  :: mol_biso
 real(dp), allocatable,intent(out) :: aniso_exp(:,:)
 real(dp), allocatable             :: tmpexp(:,:)
 real(dp) :: threebyexp(3,3)
@@ -601,11 +594,10 @@ end do
 end subroutine
 
 subroutine get_expiso(input,mol_biso,iso_exp)
-use cfml_Atom_typedef,              only: Atom_List_Type
 use mod_types,                only: inp_par
 ! first let's get all occ one's into arrays
 type(inp_par),        intent(in)  :: input
-type(atom_list_type) ,intent(in)  :: mol_biso
+type(protein_atom_list_type) ,intent(in)  :: mol_biso
 real(dp), allocatable,intent(out) :: iso_exp(:)
 integer                           :: i,j,icor,jcor,ier
 
@@ -668,7 +660,6 @@ call aniso_ccmod (thrxexp,thrxthr,ccmod,suij)
 end subroutine
 
 subroutine compisoaniso(input,mol_biso,vcov,comps)
-use cfml_Atom_typedef,              only: Atom_List_Type
 use mod_math,                 only: linear_correl
 use mod_types,                only: inp_par,isoaniso
 use mod_inout,                only: threed,oned
@@ -676,7 +667,7 @@ use mod_inout,                only: threed,oned
 ! take in var-covar matrix and pump out some comparisons
 ! DMR 12-04-2008: carry out calcs for just CA atoms... for when all atom is used
 type(inp_par), intent(in)             :: input
-type(atom_list_type) ,intent(in)      :: mol_biso
+type(protein_atom_list_type) ,intent(in)      :: mol_biso
 real(dp), allocatable,intent(in)      :: vcov(:,:)
 type(isoaniso),       intent(out)     :: comps
 real(dp), dimension(:),allocatable    :: tmpbfexp,tmpbfthr,tmpaniso,tmpanexp

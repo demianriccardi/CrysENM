@@ -3,7 +3,7 @@ module mod_vcov_store
 ! this code needs to be cleaned up and commented
 use cfml_globaldeps,                 only: dp,sp
 use mod_constants
-use cfml_Atom_typedef,                only: Atom_List_Type
+use mod_types,                        only: protein_atom_list_type
 
 implicit none
 
@@ -58,10 +58,10 @@ use mod_inout,                only : vcov_atshrink
 type(inp_par) ,       intent(inout)  :: input
 type(crystal_cell_type), intent(in)  :: cell
 type(space_group_type),  intent(in)  :: spg
-type(atom_list_type), intent(in out)  :: asym_un
+type(protein_atom_list_type), intent(in out)  :: asym_un
 type(asym_list_type), intent(in out)  :: asyms,unit_cell
 type(vcov_store)    , intent(out) :: svcov
-type(atom_list_type)                  :: tmpats
+type(protein_atom_list_type)                  :: tmpats
 type(asym_list_type)                  :: subun_cell
 real(dp), allocatable :: vcov(:,:),tmp_vcov(:,:)
 type(sparse) :: kirchoff,hessian
@@ -196,7 +196,7 @@ use mod_lattdyn,              only : bnm_bigvcov,qdispers
 type(inp_par) ,       intent(inout)  :: input
 type(crystal_cell_type), intent(in)  :: cell
 type(space_group_type),  intent(in)  :: spg
-type(atom_list_type), intent(in out)  :: asym_un
+type(protein_atom_list_type), intent(in out)  :: asym_un
 type(asym_list_type), intent(in out)  :: asyms,unit_cell
 type(vcov_store)    , intent(out) :: svcov
 type(block),allocatable,optional, intent(out) :: blocks(:)
@@ -326,7 +326,7 @@ use mod_bnm
 use mod_lattdyn,              only : bnm_bigvcov,qdispers
 type(inp_par) ,       intent(in out)   :: input
 type(crystal_cell_type) ,    intent(in) :: cell
-type(atom_list_type), intent(in out) :: asym_un
+type(protein_atom_list_type), intent(in out) :: asym_un
 type(asym_list_type), intent(in out) :: asyms,unit_cell
 type(vcov_store)    , intent(out)    :: svcov
 type(dos),            intent(out)    :: states
@@ -430,11 +430,10 @@ if (allocated(svcov%zaniso))  svcov%zaniso  =scalar * svcov%zaniso
 end subroutine
 
 subroutine svcov_massadjust(input,atoms,svcov)
-use cfml_Atom_typedef,                only: Atom_List_Type
 use mod_crysbuild, only: invrt_rtmass_vector 
 use mod_types,     only: inp_par 
 type(inp_par),               intent(in)     :: input
-type(atom_list_type),        intent(in)     :: atoms
+type(protein_atom_list_type),        intent(in)     :: atoms
 type(vcov_store),            intent(in out) :: svcov
 real(dp), allocatable                       :: thr_rtm(:), one_rtm(:)
 integer :: i,j,icor,jcor,ii,jj
@@ -756,9 +755,8 @@ end if
 end subroutine
 
 subroutine atcorr_mat(atoms,matrx)
-use cfml_Atom_typedef,                only: Atom_List_Type
 ! take natom x natom correlation matrx and 
-type(atom_list_type), intent(in) :: atoms
+type(protein_atom_list_type), intent(in) :: atoms
 real(dp), allocatable, intent(inout) :: matrx(:,:)
 real(dp), allocatable :: tmpmat(:,:)
 integer :: i,j
@@ -783,7 +781,6 @@ matrx = tmpmat
 end subroutine
 
 subroutine atcorr_mat_isomult(iso,matrx)
-use cfml_Atom_typedef,                only: Atom_List_Type
 ! take natom x natom correlation matrx and 
 real(dp), allocatable,intent(in) :: iso(:)
 real(dp), allocatable, intent(inout) :: matrx(:,:)

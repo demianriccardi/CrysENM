@@ -43,14 +43,14 @@ module mod_crysbuild
 !
 
 ! crysFML modules
-use cfml_crystallographic_symmetry,  only: space_group_type, get_orbit,get_orbit_nocent,applyso
+use cfml_crystallographic_symmetry,  only: space_group_type, get_orbit,applyso
 use cfml_Scattering_Chemical_Tables, only: Get_Atomic_Mass
-use cfml_Atom_typedef,                only: Atom_List_Type, init_atom_type
+!use cfml_Atom_typedef,                only: Atom_List_Type, init_atom_type
 use cfml_crystal_metrics,              only: Crystal_Cell_Type
 use cfml_globaldeps,                   only: sp,dp
 
 ! external modules
-use mod_types,                  only: uc_list_type,Neigh_List_Type,asym_List_Type 
+use mod_types,                  only: uc_list_type,Neigh_List_Type,asym_List_Type, init_protein_atom_type, protein_atom_list_type 
 use mod_math,                   only: dist_sqr
 use mod_inout,                  only: fileroot
 
@@ -84,7 +84,7 @@ subroutine mass_weightit(genm,atoms,matin,matout,zd)
 use mod_types,     only: sparse
 use mod_inout,     only: sparse_refinit
 character(len=3),    intent(in)      :: genm
-type(atom_list_type), intent(in)     :: atoms
+type(protein_atom_list_type), intent(in)     :: atoms
 type(sparse),intent(in)              :: matin
 type(sparse),intent(out)             :: matout
 type(sparse)                         :: rtmasses
@@ -115,7 +115,7 @@ subroutine zmass_weightit(genm,atoms,matin)
 use mod_types,     only: sparse
 use mod_inout,     only: sparse_refinit
 character(len=3),         intent(in)     :: genm
-type(atom_list_type),     intent(in)     :: atoms
+type(protein_atom_list_type),     intent(in)     :: atoms
 complex(dp) ,allocatable, intent(inout)  :: matin(:,:)
 type(sparse)                         :: rtmasses
 integer                              :: i,j,k,l,ndim,nat
@@ -137,7 +137,7 @@ subroutine mass_vector_build_atom (atom_list,masses)
 use mod_types,     only : sparse
 use mod_constants, only : one,zero
 ! returns U sparse-matrix with masses along diag
-type(atom_list_type),  intent(in)  :: atom_list
+type(protein_atom_list_type),  intent(in)  :: atom_list
 real(dp), allocatable, intent(out) :: masses(:)
 integer                            :: nrepeat
 real(sp)                           :: mass
@@ -185,7 +185,7 @@ subroutine invrt_rtmass_vector (atom_list,inv_rtmass)
 use mod_types,     only : sparse
 use mod_constants, only : one,zero
 ! returns U sparse-matrix with masses along diag
-type(atom_list_type),  intent(in)  :: atom_list
+type(protein_atom_list_type),  intent(in)  :: atom_list
 real(dp), allocatable, intent(out) :: inv_rtmass(:)
 real(sp)                           :: mass
 integer                            :: i,j,k,ndim, ialloc
@@ -203,7 +203,7 @@ end subroutine
 subroutine atvec_COM(atom_list,com)
 ! center of mass calc
 use mod_constants, only : one,zero
-type(atom_list_type),  intent(in)   :: atom_list
+type(protein_atom_list_type),  intent(in)   :: atom_list
 real(dp),              intent(out)  :: com(3)
 real(dp), allocatable               :: masses(:)
 real(dp) :: sum_mass
@@ -225,7 +225,7 @@ subroutine mass_matrix_build (atom_list,masses,genm)
 use mod_types,     only : sparse
 use mod_constants, only : one
 ! returns U sparse-matrix with masses along diag
-type(atom_list_type), intent(in)  :: atom_list
+type(protein_atom_list_type), intent(in)  :: atom_list
 type(sparse),         intent(out) :: masses
 character(len=3),     intent(in)  :: genm
 integer                           :: nrepeat
@@ -279,7 +279,7 @@ use mod_types , only: inp_par, asym_list_type, uc_type
 type(inp_par)          , intent(in out)     :: input
 type (crystal_cell_type),intent(in)     :: Cell
 type (space_group_type), intent(in)     :: SpG
-type (atom_list_type),   intent(in out) :: asym_un ! inout tofrom fractional coords  
+type (protein_atom_list_type),   intent(in out) :: asym_un ! inout tofrom fractional coords  
 type (asym_list_type),   intent(out)    :: asyms 
 type (asym_list_type),   intent(out)    :: unit_cell
 real(dp)                                :: rcut
@@ -314,9 +314,9 @@ use mod_types , only: inp_par, neigh_list_type
 type(inp_par)          , intent(in)     :: input
 type (crystal_cell_type),intent(in)     :: Cell
 type (space_group_type), intent(in)     :: SpG
-type (atom_list_type),   intent(in out) :: asym_un ! inout tofrom fractional coords  
+type (protein_atom_list_type),   intent(in out) :: asym_un ! inout tofrom fractional coords  
 type (neigh_list_type),  intent(out)    :: images 
-type (atom_list_type)                   :: asym_rcnt, unit_cell
+type (protein_atom_list_type)                   :: asym_rcnt, unit_cell
 real(dp)                                :: rcut
 integer                                 :: i,j
 
@@ -348,8 +348,8 @@ use mod_types,  only: inp_par, uc_list_type
 type(inp_par)          , intent(in out)     :: input !passed to asym_gen
 type (Crystal_Cell_Type),intent(in)     :: Cell
 type (space_group_type), intent(in)     :: SpG
-type (Atom_list_Type),   intent(in out) :: asym_un ! needs to be convert to and from fractional coords  
-type (Atom_list_Type)                   :: asym_rcnt,unit_cell
+type (protein_atom_list_type),   intent(in out) :: asym_un ! needs to be convert to and from fractional coords  
+type (protein_atom_list_type)                   :: asym_rcnt,unit_cell
 type (uc_list_Type),  intent(out)       :: asyms_im 
 type (asym_list_Type)                  :: asyms 
 real(dp)                                :: rcut  !passed to asym_gen
@@ -398,9 +398,9 @@ use cfml_math_general, only: modulo_lat
 ! DMR: 4-13-09  fixed for special sym positions
 type (inp_par),          intent(in)     :: input
 type (Crystal_Cell_Type),intent(in)     :: Cell
-type (Atom_list_Type),   intent(in out)     :: asym_un 
+type (protein_atom_list_type),   intent(in out)     :: asym_un 
 type (space_group_type), intent(in)     :: SpG
-type (Atom_list_Type),   intent(out)    :: asym_rcnt, unit_cell
+type (protein_atom_list_type),   intent(out)    :: asym_rcnt, unit_cell
 integer                                 :: i,j,jx,jy,jz,nat
 integer                                 :: nmultip,ier,natoms
 real,     allocatable                   :: orb(:,:) ! for get_orbit subroutine 
@@ -424,7 +424,7 @@ unit_cell%natoms=natoms
 if (allocated(unit_cell%atom)) deallocate(unit_cell%atom)
 allocate (unit_cell%atom(unit_cell%natoms),stat=ier)
 do i=1,unit_cell%natoms
-call init_atom_type(unit_cell%atom(i))
+call init_protein_atom_type(unit_cell%atom(i))
 end do
 
 allocate(orb(3,SpG%multip), stat=ier)
@@ -483,9 +483,9 @@ use cfml_math_general, only: modulo_lat
 ! DMR: 4-13-09  fixed for special sym positions
 type (inp_par),          intent(in)     :: input
 type (Crystal_Cell_Type),intent(in)     :: Cell
-type (Atom_list_Type),   intent(in)     :: asym_un 
+type (protein_atom_list_type),   intent(in)     :: asym_un 
 type (space_group_type), intent(in)     :: SpG
-type (Atom_list_Type),   intent(out)    :: unit_cell
+type (protein_atom_list_type),   intent(out)    :: unit_cell
 integer                                 :: i,j,jx,jy,jz,nat
 integer                                 :: nmultip,ier,natoms
 real,     allocatable                   :: orb(:,:) ! for get_orbit subroutine 
@@ -501,7 +501,7 @@ unit_cell%natoms=natoms
 if (allocated(unit_cell%atom)) deallocate(unit_cell%atom)
 allocate (unit_cell%atom(unit_cell%natoms),stat=ier)
 do i=1,unit_cell%natoms
-call init_atom_type(unit_cell%atom(i))
+call init_protein_atom_type(unit_cell%atom(i))
 end do
 
 ! fill up unit cell
@@ -509,7 +509,8 @@ allocate(orb(3,SpG%multip), stat=ier)
 nat=0
 do i=1, asym_un%natoms
 !call Get_Orbit(asym_rcnt%atom(i)%x(:),SpG,nmultip,orb)
-call Get_Orbit_nocent(asym_un%atom(i)%x(:),SpG,nmultip,orb)
+call Get_Orbit(asym_un%atom(i)%x(:),SpG,nmultip,orb)
+!call Get_Orbit_nocent(asym_un%atom(i)%x(:),SpG,nmultip,orb)
 do j=1,nmultip
     nat=nat+1
     unit_cell%atom(nat)        = asym_un%atom(i)
@@ -543,7 +544,7 @@ subroutine number_of_p1atoms(asym,spg,natoms)
 ! this is NOT simply the multiplicity of space group times natoms: 
 !             unit_cell%natoms=asym_rcnt%natoms*Spg%multip
 ! because there may be special sym positions (especially in systems with higher symm)           
-type (Atom_list_Type),   intent(in)    :: asym
+type (protein_atom_list_type),   intent(in)    :: asym
 type (space_group_type), intent(in)    :: SpG
 integer,                 intent(out)   :: natoms
 real,     allocatable                  :: orb(:,:) ! for get_orbit subroutine 
@@ -553,7 +554,8 @@ allocate(orb(3,SpG%multip), stat=ier)
 natoms=0
 do i=1, asym%natoms
 !  print *, 'atom ', i, ' ', asym%atom(i)%biso
-  call Get_Orbit_nocent(asym%atom(i)%x(:),SpG,nmultip,orb)
+  call Get_Orbit(asym%atom(i)%x(:),SpG,nmultip,orb)
+  !call Get_Orbit_nocent(asym%atom(i)%x(:),SpG,nmultip,orb)
 !  print *, orb 
   natoms = natoms + nmultip
 end do
@@ -581,7 +583,7 @@ unit_cell%nneighs = asyms%nneighs
 if (allocated(unit_cell%atom)) deallocate(unit_cell%atom)
 allocate (unit_cell%atom(unit_cell%natoms),stat=ier)
 do i=1,unit_cell%natoms
-  call init_atom_type(unit_cell%atom(i))
+  call init_protein_atom_type(unit_cell%atom(i))
 end do
 
 nat = 0
@@ -599,7 +601,7 @@ subroutine asymlist_to_atomlist(asyms,unit_cell)
 use mod_types, only : asym_list_Type
 use mod_inout, only : pdbwriter_new
 type (asym_list_Type),   intent(in)   :: asyms
-type (atom_list_Type),   intent(out)  :: unit_cell
+type (protein_atom_list_type),   intent(out)  :: unit_cell
 integer :: i,j,k,nat,natoms,ier
 
 unit_cell%natoms = asyms%natoms
@@ -607,7 +609,7 @@ unit_cell%natoms = asyms%natoms
 if (allocated(unit_cell%atom)) deallocate(unit_cell%atom)
 allocate (unit_cell%atom(unit_cell%natoms),stat=ier)
 do i=1,unit_cell%natoms
-  call init_atom_type(unit_cell%atom(i))
+  call init_protein_atom_type(unit_cell%atom(i))
 end do
 
 
@@ -626,7 +628,7 @@ subroutine asymlist_to_uctype(asyms,unit_cell)
 use mod_types, only : asym_list_Type
 use mod_inout, only : pdbwriter_new
 type (asym_list_Type),   intent(in)   :: asyms
-type (atom_list_Type),   intent(out)  :: unit_cell
+type (protein_atom_list_type),   intent(out)  :: unit_cell
 integer :: i,j,k,nat,natoms,ier
 
 unit_cell%natoms = asyms%natoms
@@ -634,7 +636,7 @@ unit_cell%natoms = asyms%natoms
 if (allocated(unit_cell%atom)) deallocate(unit_cell%atom)
 allocate (unit_cell%atom(unit_cell%natoms),stat=ier)
 do i=1,unit_cell%natoms
-  call init_atom_type(unit_cell%atom(i))
+  call init_protein_atom_type(unit_cell%atom(i))
 end do
 
 
@@ -672,7 +674,7 @@ allocate (unit_cell%aunit(1)%atom(unit_cell%natoms),stat=ier)
 if (ier /= 0) STOP "*** not enough memory ***"
 
 do j=1,unit_cell%natoms
-  call init_atom_type(unit_cell%aunit(1)%atom(j))
+  call init_protein_atom_type(unit_cell%aunit(1)%atom(j))
 end do
 
 ! copy all asym units into one unit cell
@@ -740,7 +742,7 @@ do i = 1,nun
   allocate (chunk%aunit(i)%atom(chunk%aunit(i)%natoms),stat=ier)
   if (ier /= 0) STOP "*** not enough memory ***"
   do j=1,chunk%aunit(i)%natoms
-    call init_atom_type(chunk%aunit(i)%atom(j))
+    call init_protein_atom_type(chunk%aunit(i)%atom(j))
   end do
 end do
 ! next copy in the stuff
@@ -797,8 +799,8 @@ subroutine atom_shrinker(input,atoms_in,atoms_out)
 ! into one asym unit...  ie.  reducing the symm to p1
 use mod_types, only : inp_par
 type (inp_par),          intent(in)    :: input
-type (atom_list_Type),   intent(in)    :: atoms_in
-type (atom_list_Type),   intent(out)   :: atoms_out
+type (protein_atom_list_type),   intent(in)    :: atoms_in
+type (protein_atom_list_type),   intent(out)   :: atoms_out
 integer                                :: i,j,k,ier,nat
 
 nat = 0
@@ -818,7 +820,7 @@ allocate (atoms_out%atom(nat),stat=ier)
 if (ier /= 0) STOP "*** not enough memory ***"
 
 do j=1,nat
-  call init_atom_type(atoms_out%atom(j))
+  call init_protein_atom_type(atoms_out%atom(j))
 end do
 
 j = 0
@@ -843,7 +845,7 @@ use mod_symop, only : vecmat3_rotate
 !       so we can test and try the faster neighbor approach
 type(inp_par)          , intent(in out)    :: input
 type (Crystal_Cell_Type),intent(in)    :: Cell
-type (Atom_list_Type),   intent(in)    :: asym
+type (protein_atom_list_type),   intent(in)    :: asym
 type (space_group_type), intent(in)    :: SpG
 type (asym_list_Type),   intent(out)  :: unit_cell
 integer                                :: inc,i,j,jj,h,k,jx,jy,jz,neigh
@@ -888,7 +890,7 @@ do i=1,unit_cell%naunits
   allocate (unit_cell%aunit(i)%atom(asym%natoms),stat=ier)
   if (ier /= 0) STOP "*** not enough memory ***"
   do j=1,asym%natoms
-    call init_atom_type(unit_cell%aunit(i)%atom(j))
+    call init_protein_atom_type(unit_cell%aunit(i)%atom(j))
   end do
 end do
 
@@ -912,7 +914,8 @@ allocate(orb(3,SpG%multip), stat=ier)
 ! fill up unit cell
 do j=1,spg%multip
   do i=1, asym%natoms
-    call Get_Orbit_nocent(asym%atom(i)%x(:),SpG,nmultip,orb)
+    call Get_Orbit(asym%atom(i)%x(:),SpG,nmultip,orb)
+    !call Get_Orbit_nocent(asym%atom(i)%x(:),SpG,nmultip,orb)
     unit_cell%aunit(j)%atom(i)   = asym%atom(i)
     unit_cell%aunit(j)%atom(i)%x = orb(:,j)
     unit_cell%aunit(j)%atom(i)%iaunit = j
@@ -938,7 +941,8 @@ end do
 if (allocated(input%block_cents)) then
   do j = 1,spg%multip
     do i = 1, size(input%block_cents(:,1))
-      call Get_Orbit_nocent(unit_Cell%block_cents(i,:),SpG,nmultip,orb) 
+      call Get_Orbit(unit_Cell%block_cents(i,:),SpG,nmultip,orb) 
+      !call Get_Orbit_nocent(unit_Cell%block_cents(i,:),SpG,nmultip,orb) 
       unit_cell%block_cents(i+input%nblocks*(j-1),:) = orb(:,j) 
     end do
   end do
@@ -1014,7 +1018,7 @@ end subroutine
 
 subroutine block_assign_atasy (asym,asyms,nblocks)
 use mod_types, only : asym_list_Type
-type (Atom_list_Type),   intent(in)     :: asym
+type (protein_atom_list_type),   intent(in)     :: asym
 type (asym_list_Type),   intent(inout)  :: asyms
 integer,                 intent(in)     :: nblocks
 integer :: i,j
@@ -1052,7 +1056,7 @@ end subroutine
 subroutine nonasym_gen(rcut,cell,asym,SpG,unit_cell)
 real(dp)               , intent(in)    :: rcut
 type (Crystal_Cell_Type),intent(in)    :: Cell
-type (Atom_list_Type),   intent(inout)    :: asym !DMR test inout 12-2-08
+type (protein_atom_list_type),   intent(inout)    :: asym !DMR test inout 12-2-08
 type (space_group_type), intent(in)    :: SpG
 type (asym_list_Type),   intent(out)  :: unit_cell
 integer                                :: inc,i,j,h,k,jx,jy,jz,neigh
@@ -1081,7 +1085,7 @@ do i=1,unit_cell%naunits
   allocate (unit_cell%aunit(i)%atom(asym%natoms),stat=ier)
   if (ier /= 0) STOP "*** not enough memory ***"
   do j=1,asym%natoms
-    call init_atom_type(unit_cell%aunit(i)%atom(j))
+    call init_protein_atom_type(unit_cell%aunit(i)%atom(j))
   end do
 end do
 
@@ -1146,7 +1150,7 @@ do i=0,images%nneighs
     allocate (images%neigh(i)%aunit(j)%atom(nat_asym),stat=ier)
     if (ier /= 0) STOP "*** not enough memory ***"
     do k=1,unit_cell%aunit(j)%natoms
-      call init_atom_type(images%neigh(i)%aunit(j)%atom(k))
+      call init_protein_atom_type(images%neigh(i)%aunit(j)%atom(k))
     end do
   end do
 end do
@@ -1207,7 +1211,7 @@ use mod_types, only: inp_par,neigh_list_Type
 ! as in charmm where a half plus the corners are included.
 type (inp_par)            , intent(in)   :: input
 type (Crystal_Cell_Type),intent(in)    :: Cell
-type (Atom_list_Type),   intent(in)    :: unit_cell
+type (protein_atom_list_type),   intent(in)    :: unit_cell
 type (neigh_list_Type),   intent(out)  :: images
 integer                                :: inc,i,j,jx,jy,jz,neigh,ier,nadir,nbdir,ncdir
 integer :: nneighs,na(2),nb(2),nc(2)
@@ -1230,7 +1234,7 @@ do i=0,images%nneighs
   allocate (images%neigh(i)%atom(unit_cell%natoms),stat=ier)
   if (ier /= 0) STOP "*** not enough memory ***"
   do j=1,unit_cell%natoms
-    call init_atom_type(images%neigh(i)%atom(j))
+    call init_protein_atom_type(images%neigh(i)%atom(j))
   end do
 end do
 
@@ -1266,7 +1270,7 @@ use mod_inout, only:pdbwriter_cryst
 ! build up the crystal chunk: unit cell plus neighbors (defined within chunk datastructure)  
 type (inp_par)          , intent(in)   :: input
 type (Crystal_Cell_Type),intent(in)    :: Cell
-type (Atom_list_Type),   intent(in out)  :: unit_cell
+type (protein_atom_list_type),   intent(in out)  :: unit_cell
 type (neigh_list_Type),   intent(in out)  :: chunk
 integer                                :: inc,i,j,jx,jy,jz,neigh,ier
 
@@ -1299,7 +1303,7 @@ do i=0,chunk%nneighs
   allocate (chunk%neigh(i)%atom(unit_cell%natoms),stat=ier)
   if (ier /= 0) STOP "*** not enough memory ***"
   do j=1,unit_cell%natoms
-    call init_atom_type(chunk%neigh(i)%atom(j))
+    call init_protein_atom_type(chunk%neigh(i)%atom(j))
   end do
 end do
 
@@ -1338,11 +1342,11 @@ call pdbwriter_cryst(chunk,trim(input%fileroot)//"-chunky")
 
 end subroutine
 
-! this cart to fract should be able to be overloaded with atom_list_type
+! this cart to fract should be able to be overloaded with protein_atom_list_type
 ! or uc_type as they are similarly called
 subroutine atomlist_cart_to_fract (cell, atoms_in)
 type (Crystal_Cell_Type),intent(in)     :: Cell
-type (Atom_list_Type),   intent(in out) :: atoms_in
+type (protein_atom_list_type),   intent(in out) :: atoms_in
 integer                                 :: i
 
     do i=1,atoms_in%natoms
@@ -1353,7 +1357,7 @@ end subroutine
 
 subroutine atomlist_fract_to_cart (cell, atoms_in)
 type (Crystal_Cell_Type),intent(in)     :: Cell
-type (Atom_list_Type),   intent(in out) :: atoms_in
+type (protein_atom_list_type),   intent(in out) :: atoms_in
 integer                                 :: i
 
     do i=1,atoms_in%natoms
@@ -1489,7 +1493,7 @@ subroutine residue_masses (atoms_in, masses)
 ! for this sort of mass weighting, the protein should be course grained
 ! to one atom per residue, we'll accomplish this with the requirement that all labels be the same
 !       
-type (Atom_list_Type),   intent(in)  :: atoms_in
+type (protein_atom_list_type),   intent(in)  :: atoms_in
 real(dp), allocatable,   intent(out) :: masses(:)
 integer                              :: i,ier
 character(len=6) :: label1
@@ -1513,7 +1517,7 @@ subroutine atom_mass_constr(input,atoms,masses)
 use mod_types,     only: inp_par
 use mod_constants, only: one
 type (inp_par),          intent(in)  :: input 
-type (Atom_list_Type),   intent(in)  :: atoms
+type (protein_atom_list_type),   intent(in)  :: atoms
 real(dp),allocatable,    intent(out) :: masses(:)
 integer :: ier
 
@@ -1542,7 +1546,7 @@ subroutine spherical_carve(iat,max_coor,dmax,Cell,Spg,A,coord)
     real(kind=dp),            intent(in)   :: dmax
     type (Crystal_cell_Type), intent(in)   :: Cell
     type (Space_Group_Type),  intent(in)   :: SpG
-    type (atom_list_type),    intent(inout):: A  ! inout to be able to convert to fract if needed
+    type (protein_atom_list_type),    intent(inout):: A  ! inout to be able to convert to fract if needed
     character (len=25)   ,    intent(in)   :: coord
 
     !---- Local Variables ----!
@@ -1600,7 +1604,6 @@ subroutine spherical_carve(iat,max_coor,dmax,Cell,Spg,A,coord)
     endif
     return
   end subroutine
-
 
 end module
 

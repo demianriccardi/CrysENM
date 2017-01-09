@@ -14,8 +14,7 @@ module mod_correl_dist
 !        
 
 use cfml_globaldeps,                 only: dp,sp
-use cfml_Atom_typedef,               only: Atom_List_Type
-use mod_types,                       only: inp_par,asym_List_Type
+use mod_types,                       only: inp_par,protein_atom_list_type,asym_List_Type
 use mod_math
 use mod_constants
 
@@ -34,7 +33,7 @@ subroutine corrtabdexp_iso(input,atoms, &
 ! C_kk' = C0 x exp(-r_kk' / gamm)
 ! rcut is the cutoff
 type(inp_par), intent(in)         :: input
-type(atom_list_type),intent(in)   :: atoms
+type(protein_atom_list_type),intent(in)   :: atoms
 real(dp),intent(out), allocatable   :: correlation(:,:)
 integer                         :: i,j,natom,ialloc
 real(dp)                        :: dist,dxyz(3),rcut,gamm,c0
@@ -167,7 +166,7 @@ subroutine correl_distscl(rcut,atoms, &
                                   correlation)
 ! absolute correlation (ie: 1.0) based on a cutoff of distance
 real(dp),intent(in)             :: rcut
-type(atom_list_type),intent(in)   :: atoms
+type(protein_atom_list_type),intent(in)   :: atoms
 real(dp),intent(out), allocatable   :: correlation(:,:)
 integer                         :: i,j,natom,ialloc
 real(dp)                        :: dist,dst_sqr,dcut,dxyz(3)

@@ -7,8 +7,7 @@ module mod_bnm
 !   center of mass
 !   transformation matrix (P) to/fro cartesian and T/R   
 !       
-use cfml_Atom_typedef,                only: Atom_List_Type 
-use mod_types,                  only: inp_par,sparse
+use mod_types,                  only: inp_par,sparse,protein_atom_list_type
 use mod_constants
 
 implicit none
@@ -151,10 +150,10 @@ use mod_types,     only: inp_par
 use mod_linalg,    only: lapack_eig3
 use mod_crysbuild, only: atom_shrinker
 type(inp_par),            intent(in)      :: input
-type(atom_list_type),     intent(in)      :: atoms_in
+type(protein_atom_list_type),     intent(in)      :: atoms_in
 type(block), allocatable, intent(in)      :: blocks_in(:)
 type(block), allocatable, intent(inout)   :: blocks_out(:)
-type(atom_list_type)                      :: subatoms
+type(protein_atom_list_type)                      :: subatoms
 integer :: i,ii,jj,kk,k,j,ialloc,nat,ier
 
 call atom_shrinker(input,atoms_in,subatoms)
@@ -203,7 +202,7 @@ subroutine bnm_interact_tf(input,atoms1,atoms2,lattvec,ablock1,ablock2,tfint)
 use mod_types, only: inp_par
 use mod_math,                 only: distance
 type(inp_par),          intent(in)  :: input
-type(atom_list_type),   intent(in)  :: atoms1,atoms2
+type(protein_atom_list_type),   intent(in)  :: atoms1,atoms2
 real(dp), dimension(3), intent(in)  :: lattvec
 type(block),            intent(in)  :: ablock1,ablock2
 logical,                intent(out) :: tfint
@@ -231,7 +230,7 @@ subroutine bnm_kirchoff_iso(input,atoms,blocks,kirchoff)
 use mod_types, only: inp_par
 use mod_math,                 only: distance
 type(inp_par),           intent(in)  :: input
-type(atom_list_type),    intent(in)  :: atoms
+type(protein_atom_list_type),    intent(in)  :: atoms
 type(block),allocatable, intent(in)  :: blocks(:)
 real(dp), allocatable,  intent(in out) :: kirchoff(:,:)
 logical    :: tfint
@@ -309,7 +308,7 @@ end subroutine
 !use crystal_types, only : Crystal_Cell_Type
 !type(inp_par),        intent(in out) :: input
 !type (Crystal_Cell_Type),intent(in) :: cell
-!type(atom_list_type), intent(in out) :: atoms
+!type(protein_atom_list_type), intent(in out) :: atoms
 !type(asym_list_type), intent(in out) :: unit_cell
 !type (sparse)       , intent(in)     :: kirchoff,hessian
 !real(dp), allocatable , intent(out)  :: vcov(:,:)
@@ -872,7 +871,7 @@ subroutine blocks_setup_iso(input,atoms_in,blocks)
 use mod_types,  only : inp_par
 use mod_linalg, only: lapack_eig3
 type(inp_par),            intent(in)    :: input
-type(Atom_list_Type),     intent(inout) :: atoms_in
+type(protein_atom_list_type),     intent(inout) :: atoms_in
 type(block), allocatable, intent(out)   :: blocks(:)
 integer :: i
 
@@ -951,7 +950,7 @@ use mod_crysbuild, only : atom_mass_constr
 use mod_math,      only : dist_sqr
 use mod_linalg,    only : root_invrse_mat,schmidt
 type(inp_par),            intent(in)    :: input
-type(Atom_list_Type),     intent(in)    :: atoms_in
+type(protein_atom_list_type),     intent(in)    :: atoms_in
 type(block), allocatable, intent(inout) :: blocks(:)
 real(dp),    allocatable :: masses(:)
 real(dp) :: shit(6,6),dxyz_com(3),irtmat(3,3)
@@ -1145,7 +1144,7 @@ use mod_crysbuild, only : atom_mass_constr
 use mod_math,      only : dist_sqr
 use mod_linalg,    only : schmidt
 type(inp_par),            intent(in)    :: input
-type(Atom_list_Type),     intent(in)    :: atoms_in
+type(protein_atom_list_type),     intent(in)    :: atoms_in
 type(block), allocatable, intent(inout) :: blocks(:)
 logical, optional,        intent(in)    :: qschmidt      
 real(dp),    allocatable :: masses(:)
@@ -1239,7 +1238,7 @@ subroutine read_blocks_atom(input,atoms_in,blockfile)
 ! this will need to be changed, but it's ok for now
 use mod_types, only: inp_par
 type(inp_par),           intent(in out)  :: input
-type (Atom_list_Type),   intent(in out)  :: atoms_in
+type (protein_atom_list_type),   intent(in out)  :: atoms_in
 character(len=*), optional, intent(in)   :: blockfile
 integer :: i,j,blck,at,nat,ier,ires,maxblock,ichain
 logical :: pass
@@ -1463,7 +1462,7 @@ subroutine set_blocks(input,atoms_in,blocks)
 ! and assigns block ids to atoms
 use mod_types, only: inp_par
 type(inp_par),            intent(in)  :: input
-type (Atom_list_Type),   intent(in out)  :: atoms_in
+type (protein_atom_list_type),   intent(in out)  :: atoms_in
 type(block), allocatable, intent(out) :: blocks(:)
 integer :: i,j,k,ii,jj,nblocks,ier,at,nat,blck,max_blck
 real(dp) :: center(3), moment_I
@@ -1513,7 +1512,7 @@ use mod_crysbuild, only : atom_mass_constr
 use mod_math,      only : dist_sqr
 use mod_types,     only : inp_par
 type(inp_par),            intent(in)    :: input
-type(Atom_list_Type),     intent(in)    :: atoms_in
+type(protein_atom_list_type),     intent(in)    :: atoms_in
 type(block), allocatable, intent(inout) :: blocks(:)
 real(dp), allocatable               :: masses(:)
 integer   :: i
@@ -1659,7 +1658,7 @@ use mod_crysbuild, only : atom_mass_constr
 use mod_math,      only : dist_sqr,distance
 use mod_types,     only : inp_par
 type(inp_par),            intent(in)    :: input
-type(Atom_list_Type),     intent(in)    :: atoms_in
+type(protein_atom_list_type),     intent(in)    :: atoms_in
 type(block), allocatable, intent(inout) :: blocks(:)
 real(dp), allocatable               :: masses(:)
 integer   :: i
@@ -1701,7 +1700,7 @@ subroutine atomlist_COM(input,atom_list,iat,fat,com)
 use mod_types, only: inp_par
 use mod_crysbuild, only : atom_mass_constr 
 type(inp_par), intent(in) :: input
-type(atom_list_type),  intent(in)   :: atom_list
+type(protein_atom_list_type),  intent(in)   :: atom_list
 integer, intent(in) :: iat,fat
 real(dp),              intent(out)  :: com(3)
 real(dp), allocatable               :: masses(:)
@@ -1730,7 +1729,7 @@ use mod_crysbuild, only : atom_mass_constr
 !   computes moment of inertia as [sum_{i=iat,fat} m_i (r_i)^2]
 !   where r_i is the vector to center   
 type(inp_par),           intent(in)  :: input
-type (Atom_list_Type),   intent(in)  :: atoms_in
+type (protein_atom_list_type),   intent(in)  :: atoms_in
 real (dp) ,              intent(in)  :: center(3)
 integer,                 intent(in)  :: iat,fat
 real (dp),               intent(out) :: moment_I
@@ -1757,7 +1756,7 @@ use mod_types, only: inp_par
 !   computes moment of inertia as [sum_{i=iat,fat} m_i (r_i)^2]
 !   where r_i is the vector to center
 type(inp_par), intent(in) :: input   
-type (Atom_list_Type),   intent(in)  :: atoms_in
+type (protein_atom_list_type),   intent(in)  :: atoms_in
 real (dp) ,              intent(in)  :: center(3)
 real (dp),                intent(out) :: moment_I
 integer                              :: iat,fat

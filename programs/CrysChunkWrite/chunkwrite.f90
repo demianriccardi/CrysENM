@@ -1,8 +1,8 @@
 program chunkwrite
 !
 ! crysFML modules
+use cfml_atom_typedef,              only: atom_list_type
 use cfml_crystallographic_symmetry, only: space_group_type,Write_SpaceGroup
-use cfml_Atom_typedef,              only: Atom_List_Type
 use cfml_crystal_metrics,           only: Crystal_Cell_Type
 use cfml_IO_Formats,                only: Readn_set_Xtal_Structure, file_list_type
 use cfml_globaldeps,                only: sp,dp
@@ -11,7 +11,7 @@ use mod_crysbuild,                  only: fract_to_cart, cart_to_fract,crys_buil
 ! external modules
 use mod_inout,                only: pdbwriter_new,fileroot,fileroot_set,iso_bc
 use mod_constants,            only: one,two,zero,pi
-use mod_types,                only: inp_par,asym_list_type
+use mod_types,                only: inp_par,protein_atom_list_type, asym_list_type,inflate_atom_list
 use mod_bnm,                  only: read_blocks_atom
 use mod_lattdyn,              only: qvec_fqvec
 
@@ -24,7 +24,7 @@ implicit none
 type (file_list_type)       :: fich_cfl
 type (space_group_type)     :: SpG
 type (Crystal_Cell_Type)    :: Cell
-type (Atom_list_Type)       :: asym_un 
+type (protein_atom_list_type)       :: asym_un 
 type(asym_list_type)        :: asyms, unit_cell ,chunk
 character(len=25)           :: filcfl,filparam,crap,pdbname
 integer                     :: narg, ier,ia,ib,ic
@@ -122,7 +122,7 @@ end if
 inquire(file=trim(filcfl)//".cfl",exist=arggiven)
 if(arggiven) then
   call Readn_set_Xtal_Structure(trim(filcfl)//".cfl", &
-       Cell,SpG,asym_un,Mode="CFL",file_list=fich_cfl)
+       Cell,SpG,asym_un%atom_list_type,Mode="CFL",file_list=fich_cfl)
 !  call Write_SpaceGroup(spg,full = .true.)
 else
   print *, trim(filcfl)//".cfl ",'file not found'
