@@ -20,3 +20,4 @@ gfortran -c mod_vcov_store.f90   -I/Users/dmr3/lib/crysfml/GFortran64/LibC
 gfortran -c mod_intensity.f90    -I/Users/dmr3/lib/crysfml/GFortran64/LibC
 
 ar cr libcrysenm.a *.o
+cp *.mod libcrysenm.a ~/lib/CrysENM

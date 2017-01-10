@@ -24,7 +24,8 @@ implicit none
 type (file_list_type)       :: fich_cfl
 type (space_group_type)     :: SpG
 type (Crystal_Cell_Type)    :: Cell
-type (protein_atom_list_type)       :: asym_un 
+type (protein_atom_list_type) :: asym_un 
+type (atom_list_type)       :: asym_un_cfml 
 type(asym_list_type)        :: asyms, unit_cell ,chunk
 character(len=25)           :: filcfl,filparam,crap,pdbname
 integer                     :: narg, ier,ia,ib,ic
@@ -122,7 +123,9 @@ end if
 inquire(file=trim(filcfl)//".cfl",exist=arggiven)
 if(arggiven) then
   call Readn_set_Xtal_Structure(trim(filcfl)//".cfl", &
-       Cell,SpG,asym_un%atom_list_type,Mode="CFL",file_list=fich_cfl)
+       Cell,SpG,asym_un_cfml,Mode="CFL",file_list=fich_cfl)
+  call inflate_atom_list(asym_un_cfml, asym_un)
+  call pdbwriter_new(asym_un,trim('shit'))
 !  call Write_SpaceGroup(spg,full = .true.)
 else
   print *, trim(filcfl)//".cfl ",'file not found'
@@ -141,6 +144,7 @@ end if
 
 input%multiplicity=SpG%multip
 call qvec_fqvec(input,cell)
+print *, "shit",SpG%multip
 call crys_build_new(input,cell,spg,asym_un,asyms,unit_cell)
 call p1asym_to_chunk(ia,ib,ic,unit_cell,chunk)
 call pdbwriter_new(chunk,trim(pdbname))

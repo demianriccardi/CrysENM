@@ -14,6 +14,7 @@ MODSCRYSENM =  -I$(HLIB)/CrysENM
 F90 = gfortran -O3 #-finstrument-functions #-i-static  
 
 chunkwrite: chunkwrite.f90; $(F90) -o chunkwrite chunkwrite.f90  $(MODSCRYSFML) $(MODSCRYSENM) $(DIR) $(LIBS)  
+crystal_coords: crystal_coords.f90; $(F90) -o crystal_coords crystal_coords.f90  $(MODSCRYSFML) $(DIR) $(LIBS)  
 
 # some other compiler options used in the past
 # -CB   pretty sweet.  Checks the bounds of the arrays at runtime!

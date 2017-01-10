@@ -292,6 +292,7 @@ call cart_to_fract(cell,asym_un)
 call asym_gen(input,cell,asym_un,spg,asyms)
 call asyms_to_p1asym(asyms,unit_cell)
 
+print *, 'shit DMR ';
 ! convert pieces back to cartesian coords
 call fract_to_cart(cell,asym_un)
 call fract_to_cart(cell,asyms)
