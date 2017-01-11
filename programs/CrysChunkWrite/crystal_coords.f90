@@ -20,7 +20,7 @@ type (Crystal_Cell_Type)    :: Cell
 type (atom_list_type)       :: asym_un 
 character(len=25)           :: filcfl,filparam,crap,pdbname, cha,chb,chc
 integer                     :: narg, ier,ia,ib,ic,stat,i,j,nmultip
-real,     allocatable                   :: orb(:,:) ! for get_orbit subroutine 
+real,     allocatable                   :: x(:), orb(:,:) ! for get_orbit subroutine 
 logical                     :: arggiven
 real(sp)                    :: time1,time2
 integer                     :: nviab
@@ -57,13 +57,19 @@ call Readn_set_Xtal_Structure(trim(filcfl), &
 !end if
 
 allocate(orb(3,SpG%multip), stat=ier)
+allocate(x(3), stat=ier)
 
 ! fill up unit cell
 do j=1,spg%multip
   do i=1, asym_un%natoms
   !print *, asym_un%atom(i)%lab, asym_un%atom(i)%x(:)
-    call Get_Orbit(asym_un%atom(i)%x(:),SpG,nmultip,orb)
-    print *, asym_un%atom(i)%lab, orb(:,j)
+    call Get_Orbit(asym_un%atom(i)%x(:),SpG,nmultip,orb, preserve=.true.)
+    !print *, asym_un%atom(i)%lab, orb(:,j), nmultip
+    !asym_un%atom(i)%x(:)=matmul( asym_un%atom(i)%x(:),transpose(Cell%Cr_orth_cel) )
+    !print *, asym_un%atom(i)%lab, orb(:,j)
+    x(:) = matmul( orb(:,j), transpose(Cell%Cr_orth_cel))
+    !x(:) =orb(:,j)
+    print '', asym_un%atom(i)%lab, x(:)
   end do
 end do
 
